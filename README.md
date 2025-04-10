@@ -3,45 +3,72 @@
 │  ░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒   ││  Help you creating things better ~
 ╰────────────────────────────╯╯
 ```
-# AgentEngine
-AgentEngine is a powerful and flexible framework designed to build, manage, and deploy intelligent agents for various applications.
+
+<h1 align="center">✨ AgentEngine ✨</h1>
+<p align="center">
+  A powerful and flexible framework designed to build, manage, and deploy intelligent agents for various applications.
+</p>
+
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#demo">Usage</a> •
+  <a href="#contributing">Contributing</a> •
+  <a href="#license">License</a>
+</p>
+
+## 🌟 Todo
+- **Computer Vision**
+    - [x] COCO class checker
+    - [ ] Classify, Detect, Segment
+    - [ ] Label checker
+
+- **Database**
+    - [x] SQL queries, report and visualize
+
+- **Search Online**
+    - [x] Species meta searcher
+
 
 ## Features
+- **Modular Architecture**: Easily customize and extend the framework to suit your needs.
+- **Scalable Performance**: Handle tasks efficiently, from small-scale experiments to large-scale deployments.
+- **Comprehensive API**: Seamlessly integrate with existing systems and workflows.
 
-- Modular architecture for easy customization.
-- Scalable and efficient performance.
-- Comprehensive API for seamless integration.
 
 ## Installation
+To get started with AgentEngine, follow these simple steps:
 
 ```bash
 git clone https://github.com/your-repo/agent-engine.git
 cd agent_engine
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install the package in editable mode
 pip install -e .
 ```
-- requirements installation
-```bash
-pip install -r requirements.txt
-```
 
-## Run workflow in project
+## Demo
+### Running a Workflow
 > example in [run.py](run.py) for database query
-- create new python script
-- import `create_workflow` function from `agent_engine.utils`
+- Create a new Python script.
+- Import `create_workflow` function from `agent_engine.utils`
 ```python
 from agent_engine.utils import create_workflow
 ```
-- then init workflow and execute it in this way (example config in [configs/for_computer_vision/coco_cls_checker.yaml](configs/for_computer_vision/coco_cls_checker.yaml))
+- Initialize and execute the workflow using a configuration file (example config in [configs/for_computer_vision/coco_cls_checker.yaml](configs/for_computer_vision/coco_cls_checker.yaml))
 ```python
 workflow = create_workflow(config="configs/for_computer_vision/coco_cls_checker.yaml")
 workflow.execute()
 ```
-- [CONFIG] common customization:
-    - `model_name: Qwen/Qwen2.5-VL-3B-Instruct`: you can change to your loacal model path, or you can use online api with `model_name` format in `api_url@api_key@model_name` (there are three parts seperated by `@`. for  example `https://openrouter.ai/api/v1/chat/completions@sk-or-v1-your-key@qwen/qwen2.5-vl-72b-instruct:free`)
-- every workflow has it's special config parameters, you can check the instruction in every config's directary
-- finally, you can check the output in your terminal as like:
+### Config Customization
+- `model_name: Qwen/Qwen2.5-VL-3B-Instruct`: you can change to your loacal model path, or you can use online api with `model_name` format in `api_url@api_key@model_name` (there are three parts seperated by `@`. for  example `https://openrouter.ai/api/v1/chat/completions@sk-or-v1-your-key@qwen/qwen2.5-vl-72b-instruct:free`)
+- Every workflow has different config parameters, you can check the instruction in every config's directary
+- Check the output in your terminal:
 ![example_png](asset/example_coco_cls_checker.png)
-- okey okey, let's deep more into the `agent-engine` !!!
+- Okey well ~ let's deep more into the `agent-engine` !!!
 
 ## Contributing
 
