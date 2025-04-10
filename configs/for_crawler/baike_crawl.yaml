@@ -1,0 +1,26 @@
+workflow:
+ type: agent_engine.workflow.BaikeSpeciesWorkflow
+ agent:
+  type: agent_engine.agent.BaikeResearchAgent
+  model_name: Qwen/Qwen2.5-VL-3B-Instruct
+  system_prompt: 你是一个专业的生物信息分析助手，需要结合提供的网页内容进行信息提取
+  tmp_dir: asset/tmp
+  context: 12000
+  max_new_tokens: 8192
+ catalogue_paths:
+  - asset/物种名录/植物界-2024-47474.xlsx
+ catalogue_columns:
+  - 物种中文名
+  - 物种拉丁名
+ storage:
+  path: storage
+  update_interval: 30
+ secure_sleep:
+  time: 2
+  variation: 1
+ save:
+  save_paths:
+   - output/output.xlsx
+  save_catalogue_columns:
+   - 中文名
+   - 拉丁名

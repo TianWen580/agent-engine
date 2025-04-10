@@ -1,0 +1,17 @@
+workflow:
+ type: agent_engine.workflow.BaikeSpeciesNameTranslateWorkflow
+ agent:
+  type: agent_engine.agent.BaikeSpeciesNameTranslateAgent
+  model_name: Qwen/Qwen2.5-VL-3B-Instruct
+  system_prompt: 你是一个专业的生物信息分析助手，需要结合提供的网页内容把英文物种名称翻译成拉丁文
+  mode: en2la
+  tmp_dir: asset/tmp
+  context: 10000
+  max_new_tokens: 700
+ save_path: output/baike_species_name_la.json
+ storage:
+  path: storage/baike_species_name_translated
+  update_interval: 30
+ secure_sleep:
+  time: 2
+  variation: 1

@@ -1,0 +1,25 @@
+workflow:
+  type: agent_engine.workflow.DatabaseQueryWorkflow
+  agent:
+    type: agent_engine.agent.DatabaseQueryAgent
+    contextualize: false
+    model_name: Qwen/Qwen2.5-VL-3B-Instruct
+    system_prompt: 你是一个专业的数据库查询助手，擅长将自然语言转换为SQL
+    tmp_dir: asset/tmp
+    max_new_tokens: 1024
+  visual_agent:
+    type: agent_engine.agent.SmartVisualizeAgent
+    model_name: Qwen/Qwen2.5-VL-3B-Instruct
+    system_prompt: 你是一个专业的数据可视化设计师，擅长根据查询意图和数据结构生成ECharts配置
+    tmp_dir: asset/tmp_visual
+    max_new_tokens: 2048
+  queries:
+    - 这家公司的员工有多少人？他们的平均工资是多少？
+  verbose: true
+  save_path: output/db_queries.xlsx
+
+database:
+  host: 127.0.0.1
+  user: root
+  password: 1-Password
+  database: test

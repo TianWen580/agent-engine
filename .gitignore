@@ -1,0 +1,8 @@
+/asset/private/
+/物种名录/
+/storage/
+/output/
+**/__pycache__/
+/.vscode/
+/.idea/
+/my_configs/

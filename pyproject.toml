@@ -1,0 +1,17 @@
+[project]
+name = "agent-engine"
+version = "1.0.1"
+description = "AgentEngine is a powerful and flexible framework designed to build, manage, and deploy intelligent agents for various applications."
+authors = [
+    {name = "林天文",email = "tianwen580@hotmail.com"}
+]
+license = {text = "Apache-2.0"}
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

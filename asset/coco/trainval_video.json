@@ -1,0 +1,443 @@
+{
+    "images": [
+        {
+            "id": 0,
+            "file_name": "05 红外相机全球公开数据集/第二批/NTLNP/coco_day_and_night/东北虎/AmurTiger1077.jpg",
+            "width": 1280,
+            "height": 720
+        },
+        {
+            "id": 2,
+            "file_name": "05 红外相机全球公开数据集/第二批/NTLNP/coco_day_and_night/东北虎/AmurTiger11.jpg",
+            "width": 1280,
+            "height": 720
+        },
+        {
+            "id": 3,
+            "file_name": "05 红外相机全球公开数据集/第二批/NTLNP/coco_day_and_night/东北虎/AmurTiger1101.jpg",
+            "width": 1280,
+            "height": 720
+        }
+    ],
+    "annotations": [
+        {
+            "id": 1,
+            "image_id": 0,
+            "category_id": null,
+            "segmentation": [],
+            "area": 757068.0,
+            "bbox": [
+                0.0,
+                86.0,
+                1196.0,
+                633.0
+            ],
+            "iscrowd": 0
+        },
+        {
+            "id": 3,
+            "image_id": 2,
+            "category_id": null,
+            "segmentation": [],
+            "area": 386460.0,
+            "bbox": [
+                601.0,
+                149.0,
+                678.0,
+                570.0
+            ],
+            "iscrowd": 0
+        },
+        {
+            "id": 4,
+            "image_id": 3,
+            "category_id": null,
+            "segmentation": [],
+            "area": 40050.0,
+            "bbox": [
+                437.0,
+                273.0,
+                178.0,
+                225.0
+            ],
+            "iscrowd": 0
+        }
+    ],
+    "categories": [
+        {
+            "id": 1,
+            "name": "中亚兔-Lepus tibetanus",
+            "supercategory": ""
+        },
+        {
+            "id": 2,
+            "name": "中华斑羚-Naemorhedus griseus",
+            "supercategory": ""
+        },
+        {
+            "id": 3,
+            "name": "中华鬣羚-Capricornis milneedwardsii",
+            "supercategory": ""
+        },
+        {
+            "id": 4,
+            "name": "中国豪猪-Hystrix hodgsoni",
+            "supercategory": ""
+        },
+        {
+            "id": 5,
+            "name": "倭花鼠-Tamiops maritimus",
+            "supercategory": ""
+        },
+        {
+            "id": 6,
+            "name": "北山羊-Capra sibirica",
+            "supercategory": ""
+        },
+        {
+            "id": 7,
+            "name": "北树鼩-Tupaia belangeri",
+            "supercategory": ""
+        },
+        {
+            "id": 8,
+            "name": "华南兔-Lepus sinensis",
+            "supercategory": ""
+        },
+        {
+            "id": 9,
+            "name": "喜马拉雅旱獭-Marmota himalayana",
+            "supercategory": ""
+        },
+        {
+            "id": 10,
+            "name": "大熊猫-Ailuropoda melanoleuca",
+            "supercategory": ""
+        },
+        {
+            "id": 11,
+            "name": "小家鼠-Mus musculus",
+            "supercategory": ""
+        },
+        {
+            "id": 12,
+            "name": "小泡巨鼠-Leopoldamys edwardsi",
+            "supercategory": ""
+        },
+        {
+            "id": 13,
+            "name": "小灵猫-Viverricula indica",
+            "supercategory": ""
+        },
+        {
+            "id": 14,
+            "name": "小麂-Muntiacus reevesi",
+            "supercategory": ""
+        },
+        {
+            "id": 15,
+            "name": "岩松鼠-Sciurotamias davidianus",
+            "supercategory": ""
+        },
+        {
+            "id": 16,
+            "name": "岩羊-Pseudois nayaur",
+            "supercategory": ""
+        },
+        {
+            "id": 17,
+            "name": "川金丝猴-Rhinopithecus roxellanae",
+            "supercategory": ""
+        },
+        {
+            "id": 18,
+            "name": "帚尾豪猪-Atherurus macrourus",
+            "supercategory": ""
+        },
+        {
+            "id": 19,
+            "name": "斑林狸-Prionodon pardicolor",
+            "supercategory": ""
+        },
+        {
+            "id": 20,
+            "name": "松鼠-Sciurus vulgaris",
+            "supercategory": ""
+        },
+        {
+            "id": 21,
+            "name": "林麝-Moschus berezovskii",
+            "supercategory": ""
+        },
+        {
+            "id": 22,
+            "name": "果子狸-Paguma larvata",
+            "supercategory": ""
+        },
+        {
+            "id": 23,
+            "name": "梅花鹿-Cervus nippon",
+            "supercategory": ""
+        },
+        {
+            "id": 24,
+            "name": "毛冠鹿-Elaphodus cephalophus",
+            "supercategory": ""
+        },
+        {
+            "id": 25,
+            "name": "水鹿-Rusa unicolor",
+            "supercategory": ""
+        },
+        {
+            "id": 26,
+            "name": "灰尾兔-Lepus oiostolus",
+            "supercategory": ""
+        },
+        {
+            "id": 27,
+            "name": "狍-Capreolus pygargus",
+            "supercategory": ""
+        },
+        {
+            "id": 28,
+            "name": "狗獾-Meles meles",
+            "supercategory": ""
+        },
+        {
+            "id": 29,
+            "name": "狼-Canis lupus",
+            "supercategory": ""
+        },
+        {
+            "id": 30,
+            "name": "猕猴-Macaca mulatta",
+            "supercategory": ""
+        },
+        {
+            "id": 31,
+            "name": "猪獾-Arctonyx collaris",
+            "supercategory": ""
+        },
+        {
+            "id": 32,
+            "name": "珀氏长吻松鼠-Dremomys pernyi",
+            "supercategory": ""
+        },
+        {
+            "id": 33,
+            "name": "白腹巨鼠-Leopoldamys edwardsi",
+            "supercategory": ""
+        },
+        {
+            "id": 34,
+            "name": "白鹇-Lophura nycthemera",
+            "supercategory": ""
+        },
+        {
+            "id": 35,
+            "name": "盘羊-Ovis ammon",
+            "supercategory": ""
+        },
+        {
+            "id": 36,
+            "name": "红白鼯鼠-Petaurista alborufus",
+            "supercategory": ""
+        },
+        {
+            "id": 37,
+            "name": "红腿长吻松鼠-Dremomys pyrrhomerus",
+            "supercategory": ""
+        },
+        {
+            "id": 38,
+            "name": "红颊长吻松鼠-Dremomys rufigenis",
+            "supercategory": ""
+        },
+        {
+            "id": 39,
+            "name": "羚牛-Budorcas taxicolor",
+            "supercategory": ""
+        },
+        {
+            "id": 40,
+            "name": "花面狸-Paguma larvata",
+            "supercategory": ""
+        },
+        {
+            "id": 41,
+            "name": "草兔-Lepus capensis",
+            "supercategory": ""
+        },
+        {
+            "id": 42,
+            "name": "蒙古兔-Lepus tolai",
+            "supercategory": ""
+        },
+        {
+            "id": 43,
+            "name": "蒙古野驴-Equus hemionus",
+            "supercategory": ""
+        },
+        {
+            "id": 44,
+            "name": "藏酋猴-Macaca thibetana",
+            "supercategory": ""
+        },
+        {
+            "id": 45,
+            "name": "褐家鼠-Rattus norvegicus",
+            "supercategory": ""
+        },
+        {
+            "id": 46,
+            "name": "豚尾猴-Macaca leonina",
+            "supercategory": ""
+        },
+        {
+            "id": 47,
+            "name": "豪猪-Hystrix brachyura",
+            "supercategory": ""
+        },
+        {
+            "id": 48,
+            "name": "豹猫-Prionailurus bengalensis",
+            "supercategory": ""
+        },
+        {
+            "id": 49,
+            "name": "赤狐-Vulpes vulpes",
+            "supercategory": ""
+        },
+        {
+            "id": 50,
+            "name": "赤腹松鼠-Callosciurus erythraeus",
+            "supercategory": ""
+        },
+        {
+            "id": 51,
+            "name": "赤麂-Muntiacus vaginalis",
+            "supercategory": ""
+        },
+        {
+            "id": 52,
+            "name": "野猪-Sus scrofa",
+            "supercategory": ""
+        },
+        {
+            "id": 53,
+            "name": "金钱豹-Panthera pardus",
+            "supercategory": ""
+        },
+        {
+            "id": 54,
+            "name": "隐纹花松鼠-Tamiops swinhoei",
+            "supercategory": ""
+        },
+        {
+            "id": 55,
+            "name": "雪豹-Panthera uncia",
+            "supercategory": ""
+        },
+        {
+            "id": 56,
+            "name": "食蟹獴-Herpestes urva",
+            "supercategory": ""
+        },
+        {
+            "id": 57,
+            "name": "马鹿-Cervus elaphus",
+            "supercategory": ""
+        },
+        {
+            "id": 58,
+            "name": "鬣羚-Capricornis sumatraensis",
+            "supercategory": ""
+        },
+        {
+            "id": 59,
+            "name": "鹅喉羚-Gazella subgutturosa",
+            "supercategory": ""
+        },
+        {
+            "id": 60,
+            "name": "黄喉貂-Martes flavigula",
+            "supercategory": ""
+        },
+        {
+            "id": 61,
+            "name": "黄毛鼠-Rattus losea",
+            "supercategory": ""
+        },
+        {
+            "id": 62,
+            "name": "黄腹鼬-Mustela kathiah",
+            "supercategory": ""
+        },
+        {
+            "id": 63,
+            "name": "黄鼬-Mustela sibirica",
+            "supercategory": ""
+        },
+        {
+            "id": 64,
+            "name": "黑叶猴-Trachypithecus francoisi",
+            "supercategory": ""
+        },
+        {
+            "id": 65,
+            "name": "黑唇鼠兔-Ochotona curzoniae",
+            "supercategory": ""
+        },
+        {
+            "id": 66,
+            "name": "黑熊-Ursus thibetanus",
+            "supercategory": ""
+        },
+        {
+            "id": 67,
+            "name": "黑麂-Muntiacus crinifrons",
+            "supercategory": ""
+        },
+        {
+            "id": 68,
+            "name": "鼬獾-Melogale moschata",
+            "supercategory": ""
+        },
+        {
+            "id": 69,
+            "name": "living",
+            "supercategory": ""
+        },
+        {
+            "id": 70,
+            "name": "貉-Nyctereutes procyonoides",
+            "supercategory": ""
+        },
+        {
+            "id": 71,
+            "name": "穿山甲-Manis javanica",
+            "supercategory": ""
+        },
+        {
+            "id": 72,
+            "name": "东北虎",
+            "supercategory": ""
+        },
+        {
+            "id": 73,
+            "name": "牛",
+            "supercategory": ""
+        },
+        {
+            "id": 74,
+            "name": "狗",
+            "supercategory": ""
+        },
+        {
+            "id": 75,
+            "name": "紫貂",
+            "supercategory": ""
+        }
+    ]
+}

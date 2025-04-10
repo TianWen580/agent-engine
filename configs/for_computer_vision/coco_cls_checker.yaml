@@ -1,0 +1,16 @@
+workflow:
+  type: agent_engine.workflow.COCOClassCheckerWorkflow
+  agent:
+    type: agent_engine.agent.COCOClassCheckerAgent
+    model_name: Qwen/Qwen2.5-VL-3B-Instruct
+    system_prompt: 你是一个生物学家，擅长根据图片的coco标注，纠正其物种分类结果
+    tmp_dir: asset/tmp
+    max_new_tokens: 1024
+  allowed_classes:
+    - 东北虎
+  input:
+    coco_paths:
+      - asset/coco/trainval_video.json
+    images_path: asset/coco/images
+  save_paths:
+    - output/coco/new_coco.json
