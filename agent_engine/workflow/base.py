@@ -11,15 +11,11 @@ from contextlib import contextmanager
 from agent_engine.utils import agent_engine_version
 
 class BaseWorkflow(ABC):
-    """
-    工作流抽象基类，用于协调多个代理（Agents）完成复杂任务。
-    子类需实现 `_execute` 方法定义具体执行逻辑。
-    """
-
     def __init__(self, config: str):
         self.console = Console()
+        self.agent = None
         self._load_config(config)
-        self._live_context = None  # 用于管理动态显示的上下文
+        self._live_context = None
         
     def _load_config(self, config: str):
         """Load the configuration file."""
@@ -45,12 +41,10 @@ class BaseWorkflow(ABC):
         self.console.print(text, style="bold green")
             
     def _init_agent(self):
-        """初始化助手"""
         pass
 
     @contextmanager
     def _live_display(self, live_type="status", message=None):
-        """统一管理动态显示的上下文"""
         if self._live_context is not None:
             raise RuntimeError("A live display is already active. Nested live displays are not allowed.")
         
@@ -63,9 +57,9 @@ class BaseWorkflow(ABC):
                 SpinnerColumn(),
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
-                TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),  # 显示百分比
-                TimeElapsedColumn(),  # 已用时间
-                TimeRemainingColumn(),  # 剩余时间（ETC）
+                TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+                TimeElapsedColumn(),
+                TimeRemainingColumn(),
             ) as progress:
                 self._live_context = progress
                 yield progress
@@ -74,44 +68,52 @@ class BaseWorkflow(ABC):
         self._live_context = None
 
     def execute(self, *args, **kwargs) -> Any:
-        """执行工作流，包含预处理、执行、后处理及错误处理"""
         workflow_type = self.cfg.get("workflow", {}).get("type", "Unknown Workflow")
         self.console.print(Panel(f"[bold blue][WORKFLOW] Starting: {workflow_type}[/bold blue]", expand=False))
         
-        self.pre_execute()
         try:
+            self.console.print("[bold yellow][WORKFLOW] Pre-execution initialization...[/bold yellow]")
+            self.pre_execute()
             result = self._execute(*args, **kwargs)
             return result
         except Exception as e:
             self.handle_error(e)
             raise
         finally:
+            self.console.print("[bold yellow][WORKFLOW] Post-execution...[/bold yellow]")
+            self.post_execute()
+            self.console.print("[bold yellow][WORKFLOW] Cleaning up resources...[/bold yellow]")
             self.cleanup()
             self.console.print(Panel("[bold green][WORKFLOW] Completed[/bold green]", expand=False))
 
     @abstractmethod
     def _execute(self, *args, **kwargs) -> Any:
-        """子类需实现的具体工作流逻辑"""
         pass
 
     def pre_execute(self) -> None:
-        """执行前的初始化操作（可覆盖）"""
-        self.console.print("[bold yellow][WORKFLOW] Pre-execution initialization...[/bold yellow]")
+        pass
 
     def post_execute(self) -> None:
-        """执行后的收尾操作（可覆盖）"""
-        self.console.print("[bold yellow][WORKFLOW] Post-execution cleanup...[/bold yellow]")
+        pass
 
     def handle_error(self, error: Exception) -> None:
-        """全局错误处理（可覆盖）"""
         error_message = Syntax(str(error), "python", theme="monokai", line_numbers=False)
         self.console.print(Panel(error_message, title="[bold red][WORKFLOW] Error Occurred[/bold red]", expand=False))
 
     def cleanup(self) -> None:
-        """资源清理，自动调用代理的清理方法"""
-        self.console.print("[bold yellow][WORKFLOW] Cleaning up resources...[/bold yellow]")
+        if hasattr(self, "_live_context") and self._live_context is not None:
+            self._live_context.stop()
+            self._live_context = None
+        
+        if self.agent:
+            if isinstance(self.agent, list):
+                for single_agent in self.agent:
+                    if hasattr(single_agent, "chat_engine") and hasattr(single_agent.chat_engine, "clear_context"):
+                        single_agent.chat_engine.clear_context()
+            else:
+                if hasattr(self.agent, "chat_engine") and hasattr(self.agent.chat_engine, "clear_context"):
+                    self.agent.chat_engine.clear_context()
 
     def __del__(self):
-        # 避免在解释器关闭时调用 cleanup 导致异常
         if self._live_context is not None:
             self.cleanup()
