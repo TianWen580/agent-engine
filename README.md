@@ -1,19 +1,22 @@
-```shell
+
+```
 ╭──────  AGENT ENGINE  ──────╮╮
 │  ░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒   ││  Help you creating things better ~
 ╰────────────────────────────╯╯
+------
+A powerful and flexible framework designed to build, manage, and deploy intelligent agents for various applications.
 ```
-
-<p align="center">
-  A powerful and flexible framework designed to build, manage, and deploy intelligent agents for various applications.
-</p>
-
 <p align="center">
   <a href="#features">Features</a> •
   <a href="#installation">Installation</a> •
-  <a href="#demo">Usage</a> •
+  <strong><a href="#demo">Usage</a></strong> •
   <a href="#contributing">Contributing</a> •
   <a href="#license">License</a>
+</p>
+<p align="center">
+  <img alt="GitHub stars" src="https://img.shields.io/github/stars/TianWen580/agent-engine?style=social" />
+  <img alt="Total Downloads" src="https://img.shields.io/github/downloads/TianWen580/agent-engine/total?label=Downloads" />
+  <img alt="Latest Version" src="https://img.shields.io/github/v/release/TianWen580/agent-engine?color=%2337b58b&label=Version" />
 </p>
 
 ## 🌟 Todo
