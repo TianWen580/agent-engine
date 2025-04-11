@@ -241,5 +241,6 @@ class ContextualChatEngine(BaseChatEngine):
                 except FileNotFoundError:
                     pass
         self.tasks = {}
-        for file in os.listdir(self.tmp_dir):
-            os.remove(os.path.join(self.tmp_dir, file))
+        if os.path.exists(self.tmp_dir):
+            for file in os.listdir(self.tmp_dir):
+                os.remove(os.path.join(self.tmp_dir, file))
