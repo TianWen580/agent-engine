@@ -39,17 +39,18 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
     def _save_excel(self, save_path, df: pd.DataFrame):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         df.to_excel(save_path, index=False)
+        
+    def _pre_execute(self):
+        self.catalogue_paths = self.cfg['workflow']['catalogue_paths']
+        self.catalogue_columns = self.cfg['workflow']['catalogue_columns']
+        self.save_catalogue_columns = self.cfg['workflow']['save']['save_catalogue_columns']
+        self.save_paths = self.cfg['workflow']['save']['save_paths']
 
     def _execute(self) -> pd.DataFrame:
-        catalogue_paths = self.cfg['workflow']['catalogue_paths']
-        catalogue_columns = self.cfg['workflow']['catalogue_columns']
-        save_catalogue_columns = self.cfg['workflow']['save']['save_catalogue_columns']
-        save_paths = self.cfg['workflow']['save']['save_paths']
-
-        for path, save_path in zip(catalogue_paths, save_paths):
-            species_list = pd.read_excel(path, usecols=catalogue_columns)
-            save_catalogue_columns.reverse()
-            species_list.columns = save_catalogue_columns
+        for path, save_path in zip(self.catalogue_paths, self.save_paths):
+            species_list = pd.read_excel(path, usecols=self.catalogue_columns)
+            self.save_catalogue_columns.reverse()
+            species_list.columns = self.save_catalogue_columns
             species_list = species_list.to_dict(orient="records")
 
             os.makedirs(os.path.dirname(save_path), exist_ok=True)

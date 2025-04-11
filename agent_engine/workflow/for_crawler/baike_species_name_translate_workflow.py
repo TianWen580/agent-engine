@@ -27,6 +27,9 @@ class BaikeSpeciesNameTranslateWorkflow(BaseWorkflow):
             context=self.cfg['workflow']['agent']['context']
             )
         
+    def _pre_execute(self):
+        pass
+        
     def _execute(self, coco_file: str) -> Dict:
         with open(coco_file, 'r', encoding='utf-8') as f:
             coco_data = json.load(f)
