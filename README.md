@@ -71,7 +71,11 @@ workflow.execute()
 
 ## Contributing
 
-Contributions are welcome! Please fork the repository and submit a pull request.
+Contributions are welcome! Please submit your contribution in three steps:
+1. Please fork the repository
+2. Do your coding and submit a pull request
+3. Describe what your codes improve
+4. If you don't want to coding, you can submit issues as well. We keep opening to all users and contributors.
 
 ## License
 
