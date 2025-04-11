@@ -6,3 +6,5 @@
 /.vscode/
 /.idea/
 /my_configs/
+git-push-close.sh
+git-push-open.sh
