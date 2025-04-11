@@ -51,7 +51,7 @@ pip install -e .
 
 ## Demo
 ### Running a Workflow
-> example in [run.py](run.py) for database query
+> example in [run.py](run.py) for COCO class checker
 - Create a new Python script.
 - Import `create_workflow` function from `agent_engine.utils`
 ```python
