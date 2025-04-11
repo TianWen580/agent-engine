@@ -5,7 +5,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn, TimeRemainingColumn
 from rich.status import Status
 from contextlib import contextmanager
 from agent_engine.utils import agent_engine_version
@@ -63,7 +63,9 @@ class BaseWorkflow(ABC):
                 SpinnerColumn(),
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
-                TimeElapsedColumn(),
+                TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),  # 显示百分比
+                TimeElapsedColumn(),  # 已用时间
+                TimeRemainingColumn(),  # 剩余时间（ETC）
             ) as progress:
                 self._live_context = progress
                 yield progress
