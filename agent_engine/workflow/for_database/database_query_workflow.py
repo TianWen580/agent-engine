@@ -48,20 +48,21 @@ class DatabaseQueryWorkflow(BaseWorkflow):
             print(f"[生成SQL]\n\n{row['sql']}\n")
             print(f"[分析结果]\n\n{row['analysis']}\n")
             print("-" * 50)
+            
+    def _pre_execute(self):
+        self.results = []
+        self.queries = self.cfg['workflow']['queries']
 
     def _execute(self):
-        results = []
-        queries = self.cfg['workflow']['queries']
-
         with self._live_display(live_type="progress") as progress:
-            task = progress.add_task("[cyan]处理查询...", total=len(queries))
+            task = progress.add_task("[cyan]处理查询...", total=len(self.queries))
 
-            for query in queries:
+            for query in self.queries:
                 progress.update(task, description=f"[cyan]处理查询: {query}")
                 
                 # 数据库查询阶段
                 db_result = self.agent[0].natural_query(query)
-                results.append({
+                self.results.append({
                     "query": query,
                     "sql": db_result.get('sql', ''),
                     "result": json.dumps(db_result.get('result', []), ensure_ascii=False),
@@ -82,11 +83,12 @@ class DatabaseQueryWorkflow(BaseWorkflow):
                 
                 if not self.cfg['workflow']['agent']['contextualize']:
                     self.agent[0].chat_engine.clear_context()
-                self.visual_agent.chat_engine.clear_context()
-                self._save_results(results)
+                self.agent[1].chat_engine.clear_context()
+                self._save_results(self.results)
                 progress.console.print(f"[green][WORKFLOW] 结果已更新至 {self.cfg['workflow']['save_path']}")
 
                 progress.advance(task)
-
+                
+    def _post_execute(self):
         if self.cfg['workflow']['verbose']:
             self._verbose_output(self.cfg['workflow']['save_path'])

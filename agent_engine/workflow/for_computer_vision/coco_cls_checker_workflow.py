@@ -28,29 +28,30 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
         with open(save_path, 'w') as f:
             json.dump(coco_data, f, ensure_ascii=False, indent=4)
         print(f"[WORKFLOW] Corrected annotations saved to {save_path}")
+    
+    def _pre_execute(self):
+        self.coco_paths = self.cfg['workflow']['input']['coco_paths']
+        self.save_paths = self.cfg['workflow']['save_paths']
 
-    def _execute(self):
-        coco_paths = self.cfg['workflow']['input']['coco_paths']
-        save_paths = self.cfg['workflow']['save_paths']
-
-        if not isinstance(coco_paths, list):
-            coco_paths = [
+        if not isinstance(self.coco_paths, list):
+            self.coco_paths = [
                 os.path.join(self.cfg['workflow']['input']['coco_paths'], file)
                 for file in os.listdir(self.cfg['workflow']['input']['coco_paths'])
                 if file.endswith('.json')
             ]
-        if not isinstance(save_paths, list):
-            save_paths = [
+        if not isinstance(self.save_paths, list):
+            self.save_paths = [
                 os.path.join(
                     self.cfg['workflow']['save_paths'], os.path.basename(coco_path))
-                for coco_path in coco_paths
+                for coco_path in self.coco_paths
             ]
 
+    def _execute(self):
         with self._live_display(live_type="progress") as progress:
             outer_task = progress.add_task(
-                "[bold green]Processing COCO files...", total=len(coco_paths))
+                "[bold green]Processing COCO files...", total=len(self.coco_paths))
 
-            for coco_path, save_path in zip(coco_paths, save_paths):
+            for coco_path, save_path in zip(self.coco_paths, self.save_paths):
                 progress.console.print(
                     f"[WORKFLOW] Processing COCO file: {coco_path}")
                 coco_data = None

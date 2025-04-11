@@ -73,7 +73,7 @@ class BaseWorkflow(ABC):
         
         try:
             self.console.print("[bold yellow][WORKFLOW] Pre-execution initialization...[/bold yellow]")
-            self.pre_execute()
+            self._pre_execute()
             result = self._execute(*args, **kwargs)
             return result
         except Exception as e:
@@ -81,7 +81,7 @@ class BaseWorkflow(ABC):
             raise
         finally:
             self.console.print("[bold yellow][WORKFLOW] Post-execution...[/bold yellow]")
-            self.post_execute()
+            self._post_execute()
             self.console.print("[bold yellow][WORKFLOW] Cleaning up resources...[/bold yellow]")
             self.cleanup()
             self.console.print(Panel("[bold green][WORKFLOW] Completed[/bold green]", expand=False))
@@ -90,10 +90,10 @@ class BaseWorkflow(ABC):
     def _execute(self, *args, **kwargs) -> Any:
         pass
 
-    def pre_execute(self) -> None:
+    def _pre_execute(self) -> None:
         pass
 
-    def post_execute(self) -> None:
+    def _post_execute(self) -> None:
         pass
 
     def handle_error(self, error: Exception) -> None:
