@@ -8,7 +8,7 @@ from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn, TimeRemainingColumn
 from rich.status import Status
 from contextlib import contextmanager
-from agent_engine.utils import agent_engine_version
+from agent_engine import __version__
 
 class BaseWorkflow(ABC):
     def __init__(self, config: str):
@@ -36,7 +36,7 @@ class BaseWorkflow(ABC):
         text = f"""
 ╭──────  AGENT ENGINE  ─────╮╮
 │  ░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒  ││
-╰────────── {agent_engine_version} ─────────╯╯
+╰────────── {__version__} ─────────╯╯
 """
         self.console.print(text, style="bold green")
             
