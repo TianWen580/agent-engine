@@ -19,7 +19,7 @@ class DatabaseQueryAgent:
         context_length: int = 4096
     ):
         self.db_config = db_config
-        self.connection = mysql.connector.connect(**db_config)
+        self.connection = mysql.connector.connect(**db_config.raw)
         self.cursor = self.connection.cursor(dictionary=True)
 
         self.tables = self._get_table_metadata()

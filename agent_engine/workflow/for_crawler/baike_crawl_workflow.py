@@ -1,9 +1,7 @@
 import os
 import pandas as pd
 from typing import Any, List, Dict
-from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn
 from agent_engine.workflow import BaseWorkflow
-from agent_engine.utils import import_class
 
 
 class BaikeSpeciesWorkflow(BaseWorkflow):
@@ -12,28 +10,18 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
             config: str,
     ):
         super().__init__(config)
-        self._init_agent()
 
-        self.result_columns = [
-            "中文名", "拉丁名",
-            "中国保护等级", "国际濒危等级",
-            "形态特征(详细)", "形态特征(简化)",
-            "生活习性(详细)", "生活习性(简化)",
-            "栖息环境(详细)", "栖息环境(简化)"
-        ]
-
-    def _init_agent(self):
-        agent_class = import_class(self.cfg['workflow']['agent']['type'])
-        self.agent = agent_class(
-            model_name=self.cfg['workflow']['agent']['model_name'],
-            system_prompt=self.cfg['workflow']['agent']['system_prompt'],
-            storage_dir=self.cfg['workflow']['storage']['path'],
-            storage_update_interval=self.cfg['workflow']['storage']['update_interval'],
-            secure_sleep_time=self.cfg['workflow']['secure_sleep']['time'],
-            sleep_time_variation=self.cfg['workflow']['secure_sleep']['variation'],
-            tmp_dir=self.cfg['workflow']['agent']['tmp_dir'],
-            max_new_tokens=self.cfg['workflow']['agent']['max_new_tokens'],
-            context=self.cfg['workflow']['agent']['context']
+    def init_agents(self):
+        self.agent = self.agent_class(
+            model_name=self.cfg.workflow.agent.model_name,
+            system_prompt=self.cfg.workflow.agent.system_prompt,
+            storage_dir=self.cfg.workflow.storage.path,
+            storage_update_interval=self.cfg.workflow.storage.update_interval,
+            secure_sleep_time=self.cfg.workflow.secure_sleep.time,
+            sleep_time_variation=self.cfg.workflow.secure_sleep.variation,
+            tmp_dir=self.cfg.workflow.agent.tmp_dir,
+            max_new_tokens=self.cfg.workflow.agent.max_new_tokens,
+            context=self.cfg.workflow.agent.context
         )
 
     def _save_excel(self, save_path, df: pd.DataFrame):
@@ -41,10 +29,18 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
         df.to_excel(save_path, index=False)
         
     def _pre_execute(self):
-        self.catalogue_paths = self.cfg['workflow']['catalogue_paths']
-        self.catalogue_columns = self.cfg['workflow']['catalogue_columns']
-        self.save_catalogue_columns = self.cfg['workflow']['save']['save_catalogue_columns']
-        self.save_paths = self.cfg['workflow']['save']['save_paths']
+        self.result_columns = [
+            "中文名", "拉丁名",
+            "中国保护等级", "国际濒危等级",
+            "形态特征(详细)", "形态特征(简化)",
+            "生活习性(详细)", "生活习性(简化)",
+            "栖息环境(详细)", "栖息环境(简化)"
+        ]
+        
+        self.catalogue_paths = self.cfg.workflow.catalogue_paths
+        self.catalogue_columns = self.cfg.workflow.catalogue_columns
+        self.save_catalogue_columns = self.cfg.workflow.save.save_catalogue_columns
+        self.save_paths = self.cfg.workflow.save.save_paths
 
     def _execute(self) -> pd.DataFrame:
         for path, save_path in zip(self.catalogue_paths, self.save_paths):
