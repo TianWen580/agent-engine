@@ -3,7 +3,6 @@ import os
 import pandas as pd
 from typing import Any, List, Dict
 from agent_engine.workflow import BaseWorkflow
-from agent_engine.utils import import_class
 
 
 class BaikeSpeciesNameTranslateWorkflow(BaseWorkflow):
@@ -12,11 +11,9 @@ class BaikeSpeciesNameTranslateWorkflow(BaseWorkflow):
             config: str,
     ):
         super().__init__(config)
-        self._init_agent()
 
-    def _init_agent(self):
-        agent_class = import_class(self.cfg.workflow.agent.type)
-        self.agent = agent_class(
+    def init_agents(self):
+        self.agent = self.agent_class(
             model_name=self.cfg.workflow.agent.model_name,
             system_prompt=self.cfg.workflow.agent.system_prompt,
             storage_dir=self.cfg.workflow.storage.path,

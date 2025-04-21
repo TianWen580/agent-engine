@@ -9,28 +9,25 @@ from agent_engine.utils import import_class
 class DatabaseQueryWorkflow(BaseWorkflow):
     def __init__(self, config: str):
         super().__init__(config)
-        self._init_agents()
         self.result_columns = [
             "query", "sql", "result",
             "analysis", "timestamp", "visualizations"
         ]
 
-    def _init_agents(self):
-        db_agent_class = import_class(self.cfg.workflow.agent.type)
-        visual_agent_class = import_class(self.cfg.workflow.visual_agent.type)
+    def init_agents(self):
         self.agent = [
-            db_agent_class(
-                model_name=self.cfg.workflow.agent.model_name,
-                db_config=self.cfg.database.raw,
-                system_prompt=self.cfg.workflow.agent.system_prompt,
-                tmp_dir=self.cfg.workflow.agent.tmp_dir,
-                max_new_tokens=self.cfg.workflow.agent.max_new_tokens
+            self.agent_class[0](
+                model_name=self.cfg.workflow.agent.members[0].model_name,
+                db_config=self.cfg.database,
+                system_prompt=self.cfg.workflow.agent.members[0].system_prompt,
+                tmp_dir=self.cfg.workflow.agent.members[0].tmp_dir,
+                max_new_tokens=self.cfg.workflow.agent.members[0].max_new_tokens
             ),
-            visual_agent_class(
-                model_name=self.cfg.workflow.visual_agent.model_name,
-                system_prompt=self.cfg.workflow.visual_agent.system_prompt,
-                tmp_dir=self.cfg.workflow.visual_agent.tmp_dir,
-                max_new_tokens=self.cfg.workflow.visual_agent.max_new_tokens
+            self.agent_class[1](
+                model_name=self.cfg.workflow.agent.members[1].model_name,
+                system_prompt=self.cfg.workflow.agent.members[1].system_prompt,
+                tmp_dir=self.cfg.workflow.agent.members[1].tmp_dir,
+                max_new_tokens=self.cfg.workflow.agent.members[1].max_new_tokens
             )
         ]
 
@@ -82,7 +79,7 @@ class DatabaseQueryWorkflow(BaseWorkflow):
                 #     )
                 #     results[-1]['visualizations'] = json.dumps(visual_paths)
 
-                if not self.cfg.workflow.agent.contextualize:
+                if not self.cfg.workflow.agent.members[0].contextualize:
                     self.agent[0].chat_engine.clear_context()
                 self.agent[1].chat_engine.clear_context()
                 self._save_results(self.results)

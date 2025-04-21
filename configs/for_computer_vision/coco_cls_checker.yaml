@@ -10,7 +10,7 @@ workflow:
     - 东北虎
   input:
     coco_paths:
-      - asset/coco/东北虎.json
+      - asset/coco/trainval_video.json
     images_path: asset/coco/images
   save_paths:
-    - output/coco/东北虎_refined.json
+    - output/coco/new_coco.json

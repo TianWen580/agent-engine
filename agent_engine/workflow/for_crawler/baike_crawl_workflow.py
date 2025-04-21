@@ -2,7 +2,6 @@ import os
 import pandas as pd
 from typing import Any, List, Dict
 from agent_engine.workflow import BaseWorkflow
-from agent_engine.utils import import_class
 
 
 class BaikeSpeciesWorkflow(BaseWorkflow):
@@ -11,19 +10,9 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
             config: str,
     ):
         super().__init__(config)
-        self._init_agent()
 
-        self.result_columns = [
-            "中文名", "拉丁名",
-            "中国保护等级", "国际濒危等级",
-            "形态特征(详细)", "形态特征(简化)",
-            "生活习性(详细)", "生活习性(简化)",
-            "栖息环境(详细)", "栖息环境(简化)"
-        ]
-
-    def _init_agent(self):
-        agent_class = import_class(self.cfg.workflow.agent.type)
-        self.agent = agent_class(
+    def init_agents(self):
+        self.agent = self.agent_class(
             model_name=self.cfg.workflow.agent.model_name,
             system_prompt=self.cfg.workflow.agent.system_prompt,
             storage_dir=self.cfg.workflow.storage.path,
@@ -40,6 +29,14 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
         df.to_excel(save_path, index=False)
         
     def _pre_execute(self):
+        self.result_columns = [
+            "中文名", "拉丁名",
+            "中国保护等级", "国际濒危等级",
+            "形态特征(详细)", "形态特征(简化)",
+            "生活习性(详细)", "生活习性(简化)",
+            "栖息环境(详细)", "栖息环境(简化)"
+        ]
+        
         self.catalogue_paths = self.cfg.workflow.catalogue_paths
         self.catalogue_columns = self.cfg.workflow.catalogue_columns
         self.save_catalogue_columns = self.cfg.workflow.save.save_catalogue_columns

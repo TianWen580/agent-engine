@@ -3,17 +3,14 @@ import os
 from typing import Dict, Any, List
 import pandas as pd
 from agent_engine.workflow import BaseWorkflow
-from agent_engine.utils import import_class
 
 
 class COCOClassCheckerWorkflow(BaseWorkflow):
     def __init__(self, config: str):
         super().__init__(config)
-        self._init_agents()
 
-    def _init_agents(self):
-        agent_class = import_class(self.cfg.workflow.agent.type)
-        self.agent = agent_class(
+    def init_agents(self):
+        self.agent = self.agent_class(
             model_name=self.cfg.workflow.agent.model_name,
             system_prompt=self.cfg.workflow.agent.system_prompt,
             tmp_dir=self.cfg.workflow.agent.tmp_dir,

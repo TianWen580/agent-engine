@@ -9,15 +9,44 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeEl
 from rich.status import Status
 from contextlib import contextmanager
 from agent_engine.utils import load_config
+from agent_engine.utils import import_class
 from agent_engine import __version__
 
 class BaseWorkflow(ABC):
     def __init__(self, config: str):
         self.console = Console()
         self.agent = None
-        self._load_config(config)
         self._live_context = None
+        self._load_config(config)
+        self._init_agents()
+        self.init_agents()
         
+    def init_agents(self):
+        pass
+
+    def execute(self, *args, **kwargs) -> Any:
+        workflow_type = self.cfg.raw.get("workflow", {}).get("type", "Unknown Workflow")
+        self.console.print(Panel(f"[bold blue][WORKFLOW] Starting: {workflow_type}[/bold blue]", expand=False))
+        
+        try:
+            self.console.print("[bold yellow][WORKFLOW] Pre-execution initialization...[/bold yellow]")
+            self._pre_execute()
+            result = self._execute(*args, **kwargs)
+            return result
+        except Exception as e:
+            self.handle_error(e)
+            raise
+        finally:
+            self.console.print("[bold yellow][WORKFLOW] Post-execution...[/bold yellow]")
+            self._post_execute()
+            self.console.print("[bold yellow][WORKFLOW] Cleaning up resources...[/bold yellow]")
+            self.cleanup()
+            self.console.print(Panel("[bold green][WORKFLOW] Completed[/bold green]", expand=False))
+
+    @abstractmethod
+    def _execute(self, *args, **kwargs) -> Any:
+        pass
+    
     def _load_config(self, config: str):
         """Load the configuration file."""
         self.cfg = load_config(config)
@@ -40,8 +69,13 @@ class BaseWorkflow(ABC):
 """
         self.console.print(text, style="bold green")
             
-    def _init_agent(self):
-        pass
+    def _init_agents(self):
+        if self.cfg.workflow.agent.type == "multi_agents":
+            self.agent_class = []
+            for member_cfg in self.cfg.workflow.agent.members:
+                self.agent_class.append(import_class(member_cfg["type"]))
+        else:
+            self.agent_class = import_class(self.cfg.workflow.agent.type)
 
     @contextmanager
     def _live_display(self, live_type="status", message=None):
@@ -66,29 +100,6 @@ class BaseWorkflow(ABC):
         else:
             raise ValueError("Unsupported live_type. Choose 'status' or 'progress'.")
         self._live_context = None
-
-    def execute(self, *args, **kwargs) -> Any:
-        workflow_type = self.cfg.get("workflow", {}).get("type", "Unknown Workflow")
-        self.console.print(Panel(f"[bold blue][WORKFLOW] Starting: {workflow_type}[/bold blue]", expand=False))
-        
-        try:
-            self.console.print("[bold yellow][WORKFLOW] Pre-execution initialization...[/bold yellow]")
-            self._pre_execute()
-            result = self._execute(*args, **kwargs)
-            return result
-        except Exception as e:
-            self.handle_error(e)
-            raise
-        finally:
-            self.console.print("[bold yellow][WORKFLOW] Post-execution...[/bold yellow]")
-            self._post_execute()
-            self.console.print("[bold yellow][WORKFLOW] Cleaning up resources...[/bold yellow]")
-            self.cleanup()
-            self.console.print(Panel("[bold green][WORKFLOW] Completed[/bold green]", expand=False))
-
-    @abstractmethod
-    def _execute(self, *args, **kwargs) -> Any:
-        pass
 
     def _pre_execute(self) -> None:
         pass
