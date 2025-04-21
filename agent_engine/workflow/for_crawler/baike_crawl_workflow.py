@@ -10,8 +10,21 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
             config: str,
     ):
         super().__init__(config)
+        
+        self.result_columns = [
+            "中文名", "拉丁名",
+            "中国保护等级", "国际濒危等级",
+            "形态特征(详细)", "形态特征(简化)",
+            "生活习性(详细)", "生活习性(简化)",
+            "栖息环境(详细)", "栖息环境(简化)"
+        ]
+        
+        self.catalogue_paths = self.cfg.workflow.catalogue_paths
+        self.catalogue_columns = self.cfg.workflow.catalogue_columns
+        self.save_catalogue_columns = self.cfg.workflow.save.save_catalogue_columns
+        self.save_paths = self.cfg.workflow.save.save_paths
 
-    def init_agents(self):
+    def _init_agents(self):
         self.agent = self.agent_class(
             model_name=self.cfg.workflow.agent.model_name,
             system_prompt=self.cfg.workflow.agent.system_prompt,
@@ -28,20 +41,6 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         df.to_excel(save_path, index=False)
         
-    def _pre_execute(self):
-        self.result_columns = [
-            "中文名", "拉丁名",
-            "中国保护等级", "国际濒危等级",
-            "形态特征(详细)", "形态特征(简化)",
-            "生活习性(详细)", "生活习性(简化)",
-            "栖息环境(详细)", "栖息环境(简化)"
-        ]
-        
-        self.catalogue_paths = self.cfg.workflow.catalogue_paths
-        self.catalogue_columns = self.cfg.workflow.catalogue_columns
-        self.save_catalogue_columns = self.cfg.workflow.save.save_catalogue_columns
-        self.save_paths = self.cfg.workflow.save.save_paths
-
     def _execute(self) -> pd.DataFrame:
         for path, save_path in zip(self.catalogue_paths, self.save_paths):
             species_list = pd.read_excel(path, usecols=self.catalogue_columns)

@@ -9,12 +9,15 @@ from agent_engine.utils import import_class
 class DatabaseQueryWorkflow(BaseWorkflow):
     def __init__(self, config: str):
         super().__init__(config)
+        
         self.result_columns = [
             "query", "sql", "result",
             "analysis", "timestamp", "visualizations"
         ]
+        self.results = []
+        self.queries = self.cfg.workflow.queries
 
-    def init_agents(self):
+    def _init_agents(self):
         self.agent = [
             self.agent_class[0](
                 model_name=self.cfg.workflow.agent.members[0].model_name,
@@ -46,10 +49,6 @@ class DatabaseQueryWorkflow(BaseWorkflow):
             print(f"[生成SQL]\n\n{row['sql']}\n")
             print(f"[分析结果]\n\n{row['analysis']}\n")
             print("-" * 50)
-
-    def _pre_execute(self):
-        self.results = []
-        self.queries = self.cfg.workflow.queries
 
     def _execute(self):
         with self._live_display(live_type="progress") as progress:
