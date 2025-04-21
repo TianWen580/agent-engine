@@ -65,7 +65,7 @@ class BaseWorkflow(ABC):
         text = f"""
 ╭──────  AGENT ENGINE  ─────╮╮
 │  ░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒  ││
-╰────────── {__version__} ─────────╯╯
+╰────────── {__version__} ──────────╯╯
 """
         self.console.print(text, style="bold green")
             
