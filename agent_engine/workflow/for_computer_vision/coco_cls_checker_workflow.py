@@ -8,24 +8,7 @@ from agent_engine.workflow import BaseWorkflow
 class COCOClassCheckerWorkflow(BaseWorkflow):
     def __init__(self, config: str):
         super().__init__(config)
-
-    def init_agents(self):
-        self.agent = self.agent_class(
-            model_name=self.cfg.workflow.agent.model_name,
-            system_prompt=self.cfg.workflow.agent.system_prompt,
-            tmp_dir=self.cfg.workflow.agent.tmp_dir,
-            max_new_tokens=self.cfg.workflow.agent.max_new_tokens
-        )
-
-    def _save_results(self, save_path, corrected_annotations: List[Dict], coco_data: Dict):
-        coco_data['annotations'] = corrected_annotations
-        if not os.path.exists(os.path.dirname(save_path)):
-            os.makedirs(os.path.dirname(save_path))
-        with open(save_path, 'w') as f:
-            json.dump(coco_data, f, ensure_ascii=False, indent=4)
-        print(f"[WORKFLOW] Corrected annotations saved to {save_path}")
-    
-    def _pre_execute(self):
+        
         self.coco_paths = self.cfg.workflow.input.coco_paths
         self.save_paths = self.cfg.workflow.save_paths
 
@@ -42,6 +25,22 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
                 for coco_path in self.coco_paths
             ]
 
+    def _init_agents(self):
+        self.agent = self.agent_class(
+            model_name=self.cfg.workflow.agent.model_name,
+            system_prompt=self.cfg.workflow.agent.system_prompt,
+            tmp_dir=self.cfg.workflow.agent.tmp_dir,
+            max_new_tokens=self.cfg.workflow.agent.max_new_tokens
+        )
+
+    def _save_results(self, save_path, corrected_annotations: List[Dict], coco_data: Dict):
+        coco_data['annotations'] = corrected_annotations
+        if not os.path.exists(os.path.dirname(save_path)):
+            os.makedirs(os.path.dirname(save_path))
+        with open(save_path, 'w') as f:
+            json.dump(coco_data, f, ensure_ascii=False, indent=4)
+        print(f"[WORKFLOW] Corrected annotations saved to {save_path}")
+    
     def _execute(self):
         with self._live_display(live_type="progress") as progress:
             outer_task = progress.add_task(

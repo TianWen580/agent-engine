@@ -18,11 +18,8 @@ class BaseWorkflow(ABC):
         self.agent = None
         self._live_context = None
         self._load_config(config)
+        self._init_agent_class()
         self._init_agents()
-        self.init_agents()
-        
-    def init_agents(self):
-        pass
 
     def execute(self, *args, **kwargs) -> Any:
         workflow_type = self.cfg.raw.get("workflow", {}).get("type", "Unknown Workflow")
@@ -47,6 +44,9 @@ class BaseWorkflow(ABC):
     def _execute(self, *args, **kwargs) -> Any:
         pass
     
+    def _init_agents(self):
+        pass
+    
     def _load_config(self, config: str):
         """Load the configuration file."""
         self.cfg = load_config(config)
@@ -69,7 +69,7 @@ class BaseWorkflow(ABC):
 """
         self.console.print(text, style="bold green")
             
-    def _init_agents(self):
+    def _init_agent_class(self):
         if self.cfg.workflow.agent.type == "multi_agents":
             self.agent_class = []
             for member_cfg in self.cfg.workflow.agent.members:

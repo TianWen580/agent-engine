@@ -12,7 +12,7 @@ class BaikeSpeciesNameTranslateWorkflow(BaseWorkflow):
     ):
         super().__init__(config)
 
-    def init_agents(self):
+    def _init_agents(self):
         self.agent = self.agent_class(
             model_name=self.cfg.workflow.agent.model_name,
             system_prompt=self.cfg.workflow.agent.system_prompt,
@@ -24,9 +24,6 @@ class BaikeSpeciesNameTranslateWorkflow(BaseWorkflow):
             max_new_tokens=self.cfg.workflow.agent.max_new_tokens,
             context=self.cfg.workflow.agent.context
         )
-
-    def _pre_execute(self):
-        pass
 
     def _execute(self, coco_file: str) -> Dict:
         with open(coco_file, 'r', encoding='utf-8') as f:
