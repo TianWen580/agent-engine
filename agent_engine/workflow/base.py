@@ -8,6 +8,7 @@ from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn, TimeRemainingColumn
 from rich.status import Status
 from contextlib import contextmanager
+from agent_engine.utils import load_config
 from agent_engine import __version__
 
 class BaseWorkflow(ABC):
@@ -19,14 +20,13 @@ class BaseWorkflow(ABC):
         
     def _load_config(self, config: str):
         """Load the configuration file."""
-        with open(config, 'r') as f:
-            self.cfg = yaml.safe_load(f)
+        self.cfg = load_config(config)
         
         config_table = Table(title="Configuration Details")
         config_table.add_column("Key", style="white", no_wrap=True)
         config_table.add_column("Value", style="grey50")
         
-        for key, value in self.cfg.items():
+        for key, value in self.cfg.raw.items():
             if isinstance(value, dict):
                 value = yaml.dump(value, allow_unicode=True, sort_keys=False, default_flow_style=False).strip()
             config_table.add_row(key, str(value))

@@ -4,7 +4,6 @@ from typing import Dict, Any, List
 import pandas as pd
 from agent_engine.workflow import BaseWorkflow
 from agent_engine.utils import import_class
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn, TimeRemainingColumn
 
 
 class COCOClassCheckerWorkflow(BaseWorkflow):
@@ -13,12 +12,12 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
         self._init_agents()
 
     def _init_agents(self):
-        agent_class = import_class(self.cfg['workflow']['agent']['type'])
+        agent_class = import_class(self.cfg.workflow.agent.type)
         self.agent = agent_class(
-            model_name=self.cfg['workflow']['agent']['model_name'],
-            system_prompt=self.cfg['workflow']['agent']['system_prompt'],
-            tmp_dir=self.cfg['workflow']['agent']['tmp_dir'],
-            max_new_tokens=self.cfg['workflow']['agent']['max_new_tokens']
+            model_name=self.cfg.workflow.agent.model_name,
+            system_prompt=self.cfg.workflow.agent.system_prompt,
+            tmp_dir=self.cfg.workflow.agent.tmp_dir,
+            max_new_tokens=self.cfg.workflow.agent.max_new_tokens
         )
 
     def _save_results(self, save_path, corrected_annotations: List[Dict], coco_data: Dict):
@@ -30,19 +29,19 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
         print(f"[WORKFLOW] Corrected annotations saved to {save_path}")
     
     def _pre_execute(self):
-        self.coco_paths = self.cfg['workflow']['input']['coco_paths']
-        self.save_paths = self.cfg['workflow']['save_paths']
+        self.coco_paths = self.cfg.workflow.input.coco_paths
+        self.save_paths = self.cfg.workflow.save_paths
 
         if not isinstance(self.coco_paths, list):
             self.coco_paths = [
-                os.path.join(self.cfg['workflow']['input']['coco_paths'], file)
-                for file in os.listdir(self.cfg['workflow']['input']['coco_paths'])
+                os.path.join(self.cfg.workflow.input.coco_paths, file)
+                for file in os.listdir(self.cfg.workflow.input.coco_paths)
                 if file.endswith('.json')
             ]
         if not isinstance(self.save_paths, list):
             self.save_paths = [
                 os.path.join(
-                    self.cfg['workflow']['save_paths'], os.path.basename(coco_path))
+                    self.cfg.workflow.save_paths, os.path.basename(coco_path))
                 for coco_path in self.coco_paths
             ]
 
@@ -63,7 +62,7 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
                 allowed_classes = [
                     {"category_id": category['id'], "name": category['name']}
                     for category in coco_data['categories']
-                    if category['name'] in self.cfg['workflow']['allowed_classes']
+                    if category['name'] in self.cfg.workflow.allowed_classes
                 ]
 
                 inner_task = progress.add_task(
@@ -74,7 +73,7 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
                     annotations = [
                         ann for ann in coco_data['annotations'] if ann['image_id'] == image_info['id']]
                     coco_info = {
-                        "image_path": os.path.join(self.cfg['workflow']['input']['images_path'], image_file_name),
+                        "image_path": os.path.join(self.cfg.workflow.input.images_path, image_file_name),
                         "annotations": annotations,
                         "allowed_classes": allowed_classes
                     }
