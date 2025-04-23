@@ -1,9 +1,9 @@
 import os
 import json
 import re
+from typing import List, Dict, Optional
 from pyecharts.charts import Bar, Line, Pie
 from pyecharts import options as opts
-from typing import List, Dict
 from agent_engine.agent import ContextualChatEngine
 
 
@@ -15,13 +15,15 @@ class SmartVisualizeAgent:
         model_name: str,
         system_prompt: str = "",
         tmp_dir: str = "asset/tmp",
-        max_new_tokens: int = 1024
+        max_new_tokens: int = 1024,
+        vllm_cfg: Optional[dict] = None
     ):
         self.chat_engine = ContextualChatEngine(
             model_name=model_name,
             system_prompt=system_prompt,
             tmp_dir=tmp_dir,
-            max_new_tokens=max_new_tokens
+            max_new_tokens=max_new_tokens,
+            vllm_cfg=vllm_cfg
         )
         self.save_dir = "output/visuals"
         os.makedirs(self.save_dir, exist_ok=True)

@@ -34,7 +34,8 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
             sleep_time_variation=self.cfg.workflow.secure_sleep.variation,
             tmp_dir=self.cfg.workflow.agent.tmp_dir,
             max_new_tokens=self.cfg.workflow.agent.max_new_tokens,
-            context=self.cfg.workflow.agent.context
+            context=self.cfg.workflow.agent.context,
+            vllm_cfg=self.cfg.workflow.agent.vllm
         )
 
     def _save_excel(self, save_path, df: pd.DataFrame):

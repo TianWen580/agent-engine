@@ -24,13 +24,15 @@ class DatabaseQueryWorkflow(BaseWorkflow):
                 db_config=self.cfg.database,
                 system_prompt=self.cfg.workflow.agent.members[0].system_prompt,
                 tmp_dir=self.cfg.workflow.agent.members[0].tmp_dir,
-                max_new_tokens=self.cfg.workflow.agent.members[0].max_new_tokens
+                max_new_tokens=self.cfg.workflow.agent.members[0].max_new_tokens,
+                vllm_cfg=self.cfg.workflow.agent.vllm
             ),
             self.agent_class[1](
                 model_name=self.cfg.workflow.agent.members[1].model_name,
                 system_prompt=self.cfg.workflow.agent.members[1].system_prompt,
                 tmp_dir=self.cfg.workflow.agent.members[1].tmp_dir,
-                max_new_tokens=self.cfg.workflow.agent.members[1].max_new_tokens
+                max_new_tokens=self.cfg.workflow.agent.members[1].max_new_tokens,
+                vllm_cfg=self.cfg.workflow.agent.vllm
             )
         ]
 

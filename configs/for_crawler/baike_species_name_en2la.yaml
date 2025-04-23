@@ -2,6 +2,11 @@ workflow:
  type: agent_engine.workflow.BaikeSpeciesNameTranslateWorkflow
  agent:
   type: agent_engine.agent.BaikeSpeciesNameTranslateAgent
+  vllm:
+    enable: false
+    tensor_parallel_size: 1
+    max_model_len: 22000
+    gpu_memory_utilization: 0.9
   model_name: Qwen/Qwen2.5-VL-3B-Instruct
   system_prompt: 你是一个专业的生物信息分析助手，需要结合提供的网页内容把英文物种名称翻译成拉丁文
   mode: en2la

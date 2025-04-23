@@ -1,6 +1,5 @@
 import json
-from typing import Dict
-
+from typing import Dict, Optional
 import pandas as pd
 from agent_engine.agent import ContextualChatEngine
 from agent_engine.utils import BaikeWebCrawler
@@ -17,13 +16,15 @@ class BaikeResearchAgent:
             sleep_time_variation: int = 1,
             tmp_dir: str = "asset/tmp",
             max_new_tokens: int = 512,
-            context: int = 12000
+            context: int = 12000,
+            vllm_cfg: Optional[dict] = None
         ):
         self.chat_engine = ContextualChatEngine(
             model_name=model_name,
             system_prompt=system_prompt,
             tmp_dir=tmp_dir,
-            max_new_tokens=max_new_tokens
+            max_new_tokens=max_new_tokens,
+            vllm_cfg=vllm_cfg
         )
         self.crawler = BaikeWebCrawler(
             storage_dir=storage_dir,

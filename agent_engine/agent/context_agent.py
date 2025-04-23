@@ -13,53 +13,18 @@ class ContextualChatEngine(BaseChatEngine):
     def __init__(
         self,
         model_name: str,
-        max_pixels: int = 660 * 660,
-        min_pixels: int = 128 * 128,
         system_prompt: Optional[str] = None,
         tmp_dir: str = "asset/tmp",
-        max_new_tokens: int = 512
+        max_new_tokens: int = 512,
+        vllm_cfg: Optional[dict] = None
     ):
-        super().__init__(model_name, max_pixels, min_pixels, system_prompt, tmp_dir)
-        self.is_online = model_name.startswith('http')
-
-        if self.is_online:
-            parts = model_name.split('@', 2)
-            if len(parts) != 3:
-                raise ValueError("[AGENT] Invalid model name for online mode.")
-            self.api_url, self.api_key, self.api_model = parts
-            print(
-                f"[AGENT] Online mode with API URL: {self.api_url}")
-            print(
-                f"[AGENT] Initializing online mode with model: {self.api_model}")
-            self.model = None
-            self.processor = None
-        else:
-            print(
-                f"[AGENT] Initializing local model: {model_name}")
-            self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
-                model_name,
-                torch_dtype="auto",
-                device_map="auto"
-            )
-            self.processor = AutoProcessor.from_pretrained(
-                model_name, use_fast=True)
-
-        if not os.path.exists(tmp_dir):
-            os.makedirs(tmp_dir)
-        self.tmp_dir = tmp_dir
-        self.max_new_tokens = max_new_tokens
-        self.tasks = {}
-        self.context = []
-        if system_prompt:
-            self._init_system_prompt(system_prompt)
-
-    def _init_system_prompt(self, system_prompt: str):
-        """Initialize the system prompt."""
-        self.system_prompt = {
-            "role": "system",
-            "content": [{"type": "text", "text": system_prompt}]
-        }
-        self.context.append(self.system_prompt)
+        super().__init__(
+            model_name,
+            system_prompt,
+            tmp_dir,
+            max_new_tokens,
+            vllm_cfg
+        )
 
     def generate_response(self, prompt: str, img_path: Optional[str] = None) -> dict:
         job_id = str(uuid.uuid4())
@@ -82,7 +47,6 @@ class ContextualChatEngine(BaseChatEngine):
                             image_file.read()).decode()
                     image_url = f"data:image/jpeg;base64,{encoded_string}"
 
-                    # 添加图片内容部分
                     content.append({
                         "type": "image_url",
                         "image_url": {
@@ -98,20 +62,17 @@ class ContextualChatEngine(BaseChatEngine):
                         'image_path': img_path
                     }
 
-            # 添加文本内容部分
             content.append({
                 "type": "text",
                 "text": prompt
             })
 
-            # 构造完整消息
             messages = self.context.copy()
             messages.append({
                 "role": "user",
                 "content": content
             })
 
-            # 发送API请求
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json"
@@ -133,7 +94,6 @@ class ContextualChatEngine(BaseChatEngine):
                 response.raise_for_status()
                 result = response.json()
 
-                # 处理响应并更新上下文
                 output_text = result['choices'][0]['message']['content']
                 self.context.append({
                     "role": "assistant",
@@ -154,7 +114,6 @@ class ContextualChatEngine(BaseChatEngine):
                     'image_path': img_path
                 }
         else:
-            # 本地模型处理
             if img_path:
                 img = Image.open(img_path).convert("RGB")
                 img_path = os.path.join(self.tmp_dir, f"{job_id}.jpg")
@@ -170,46 +129,67 @@ class ContextualChatEngine(BaseChatEngine):
             return self._process_task(job_id)
 
     def _process_task(self, job_id: str) -> dict:
-        """Process a specific task with the given job ID."""
+        """
+        Generic task processing method compatible with AutoModelForCausalLM.
+        Handles text-only and multi-modal models dynamically.
+        """
         try:
             task = self.tasks[job_id]
             img_path = task['image_path']
             prompt = task['prompt']
-
             messages = self.context.copy()
-            user_content = []
 
-            if img_path:
+            # Prepare user content based on model capabilities
+            user_content = None
+            if img_path and self.model_config.supports_images:
+                user_content = []
+                img = Image.open(img_path).convert("RGB")
                 user_content.append({
                     "type": "image",
-                    "image": img_path,
-                    "max_pixels": self.max_pixels,
-                    "min_pixels": self.min_pixels
+                    "image": img,
                 })
+                user_content.append({
+                    "type": "text",
+                    "text": prompt
+                })
+            else:
+                user_content = prompt
 
-            user_content.append({
-                "type": "text",
-                "text": prompt
-            })
-
+            # Add user message to the conversation
             user_msg = {"role": "user", "content": user_content}
             messages.append(user_msg)
 
-            text = self.processor.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=True
+            # Process inputs using the processor (if available)
+            if self.processor:
+                try:
+                    text = self.processor.apply_chat_template(
+                        messages, tokenize=False, add_generation_prompt=True
+                    )
+                    if self.model_config.supports_images:
+                        inputs = self.processor(
+                            text=[text],
+                            images=[item["image"] for item in user_content if item["type"] == "image"],
+                            return_tensors="pt",
+                            padding=True,
+                        ).to(self.model.device)
+                    else:
+                        inputs = self.processor(
+                            text=[text],
+                            return_tensors="pt",
+                            padding=True,
+                        ).to(self.model.device)
+                except Exception as e:
+                    raise ValueError(f"Failed to process inputs: {e}")
+            else:
+                # If no processor is available, use raw text input
+                inputs = self.tokenizer(prompt, return_tensors="pt", padding=True).to(self.model.device)
+
+            # Generate response
+            generated_ids = self.model.generate(
+                **inputs, max_new_tokens=self.max_new_tokens
             )
 
-            image_inputs, video_inputs = process_vision_info(messages)
-            inputs = self.processor(
-                text=[text],
-                images=image_inputs,
-                videos=video_inputs,
-                padding=True,
-                return_tensors="pt",
-            ).to(self.model.device)
-
-            generated_ids = self.model.generate(
-                **inputs, max_new_tokens=self.max_new_tokens)
+            # Decode the generated output
             generated_ids_trimmed = [
                 out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
             ]
@@ -217,30 +197,20 @@ class ContextualChatEngine(BaseChatEngine):
                 generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
             )[0]
 
+            # Update task status and context
             self.tasks[job_id]['status'] = 'completed'
             self.tasks[job_id]['result'] = output_text
-            self.context.append({"role": "assistant", "content": [
-                                {"type": "text", "text": output_text}]})
-
+            if self.model_config.supports_images:
+                ai_msg = [{"type": "text", "text": output_text}]
+            else:
+                ai_msg = output_text
+            self.context.append({"role": "assistant", "content": ai_msg})
             return self.tasks[job_id]
 
         except Exception as e:
             self.tasks[job_id]['status'] = 'error'
             self.tasks[job_id]['result'] = str(e)
-            print(f"Error processing task {job_id}: {e}")
+            print(f"[AGENT] Error processing task {job_id}: {e}")
             if img_path and os.path.exists(img_path):
                 os.remove(img_path)
-
-    def clear_context(self):
-        """Clear the context and clean up temporary files."""
-        self.context = [self.system_prompt] if self.system_prompt else []
-        for task in self.tasks.values():
-            if task.get('image_path'):
-                try:
-                    os.remove(task['image_path'])
-                except FileNotFoundError:
-                    pass
-        self.tasks = {}
-        if os.path.exists(self.tmp_dir):
-            for file in os.listdir(self.tmp_dir):
-                os.remove(os.path.join(self.tmp_dir, file))
+            return self.tasks[job_id]
