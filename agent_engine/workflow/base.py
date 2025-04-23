@@ -64,10 +64,10 @@ class BaseWorkflow(ABC):
         self.console.print(Panel("[bold green][WORKFLOW] Configuration Loaded[/bold green]", expand=False))
         text = f"""
 ╭──────  AGENT ENGINE  ─────╮╮
-│  ░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒  ││
+│  ░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒  ││  Help you creating things better ~
 ╰────────── {__version__} ──────────╯╯
 """
-        self.console.print(text, style="bold green")
+        self.console.print(text)
             
     def _init_agent_class(self):
         if self.cfg.workflow.agent.type == "multi_agents":

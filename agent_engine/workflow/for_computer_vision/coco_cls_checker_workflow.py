@@ -30,7 +30,8 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
             model_name=self.cfg.workflow.agent.model_name,
             system_prompt=self.cfg.workflow.agent.system_prompt,
             tmp_dir=self.cfg.workflow.agent.tmp_dir,
-            max_new_tokens=self.cfg.workflow.agent.max_new_tokens
+            max_new_tokens=self.cfg.workflow.agent.max_new_tokens,
+            vllm_cfg=self.cfg.workflow.agent.vllm,
         )
 
     def _save_results(self, save_path, corrected_annotations: List[Dict], coco_data: Dict):

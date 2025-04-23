@@ -2,7 +2,7 @@ import ast
 import json
 import os
 import re
-from typing import Dict, List
+from typing import Dict, Optional
 from agent_engine.agent import ContextualChatEngine
 
 
@@ -15,13 +15,15 @@ class COCOClassCheckerAgent:
         system_prompt: str = "",
         tmp_dir: str = "asset/tmp",
         max_new_tokens: int = 512,
-        context_length: int = 4096
+        context_length: int = 4096,
+        vllm_cfg: Optional[dict] = None
     ):
         self.chat_engine = ContextualChatEngine(
             model_name=model_name,
             system_prompt=system_prompt,
             tmp_dir=tmp_dir,
-            max_new_tokens=max_new_tokens
+            max_new_tokens=max_new_tokens,
+            vllm_cfg=vllm_cfg
         )
         self.context_length = context_length
 
