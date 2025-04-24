@@ -14,6 +14,7 @@ class DatabaseQueryAgent:
         model_name: str,
         db_config: Dict,
         system_prompt: str = "",
+        language: str = "english",
         tmp_dir: str = "asset/tmp",
         max_new_tokens: int = 512,
         context_length: int = 4096,
@@ -37,6 +38,7 @@ class DatabaseQueryAgent:
         self.chat_engine = ContextualChatEngine(
             model_name=model_name,
             system_prompt=system_prompt,
+            language=language,
             tmp_dir=tmp_dir,
             max_new_tokens=max_new_tokens,
             vllm_cfg=vllm_cfg

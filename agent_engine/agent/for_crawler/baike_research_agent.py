@@ -23,6 +23,7 @@ class BaikeResearchAgent:
         self.chat_engine = ContextualChatEngine(
             model_name=model_name,
             system_prompt=system_prompt,
+            language=language,
             tmp_dir=tmp_dir,
             max_new_tokens=max_new_tokens,
             vllm_cfg=vllm_cfg
@@ -86,7 +87,7 @@ Please return the result in the following JSON format:
             json_content = response_text[start:end]
             return json.loads(json_content)
         except Exception as e:
-            print(f"[ERROR] Json not formated well: {e} for {name}")
+            self.chat_engine.console.print(f"[ERROR] Json not formated well: {e} for {name}")
             return {
                 **{key: f"[ERROR] Failed" for key in self.research_columns.keys()},
             }

@@ -11,6 +11,7 @@ class COCOClassCheckerAgent:
         self,
         model_name: str,
         system_prompt: str = "",
+        language: str = "english",
         tmp_dir: str = "asset/tmp",
         max_new_tokens: int = 512,
         context_length: int = 4096,
@@ -19,6 +20,7 @@ class COCOClassCheckerAgent:
         self.chat_engine = ContextualChatEngine(
             model_name=model_name,
             system_prompt=system_prompt,
+            language = language,
             tmp_dir=tmp_dir,
             max_new_tokens=max_new_tokens,
             vllm_cfg=vllm_cfg
@@ -99,7 +101,7 @@ Abstract example:
                 corrected_annotations = json.dumps(corrected_annotations)
                 corrected_annotations = json.loads(corrected_annotations)
             except (ValueError, SyntaxError) as e:
-                print(f"[AGENT] Invalid format: {corrected_annotations}. Error: {e}")
+                self.chat_engine.console.print(f"[AGENT] Invalid format: {corrected_annotations}. Error: {e}")
                 corrected_annotations = annotations
 
         id_list = [
@@ -112,7 +114,7 @@ Abstract example:
             if any(
                 cls not in id_list for cls in anno_id_list
             ):
-                print(f"[AGENT] Invalid category id generated: {annotation['category_id']}")
+                self.chat_engine.console.print(f"[AGENT] Invalid category id generated: {annotation['category_id']}")
                 corrected_annotations = annotations
                 break
 

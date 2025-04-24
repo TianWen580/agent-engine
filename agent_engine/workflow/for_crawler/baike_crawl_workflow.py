@@ -25,7 +25,7 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
         self.agent = self.agent_class(
             model_name=self.cfg.workflow.agent.model_name,
             system_prompt=self.cfg.workflow.agent.system_prompt,
-            language=self.cfg.workflow.save.language,
+            language=self.cfg.workflow.agent.language,
             research_columns=self.cfg.workflow.save.save_columns.raw,
             storage_dir=self.cfg.workflow.storage.path,
             storage_update_interval=self.cfg.workflow.storage.update_interval,
@@ -55,8 +55,8 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
             else:
                 existing_df = pd.DataFrame(columns=self.result_columns)
 
-            with self._live_display(live_type="progress") as progress:
-                task = progress.add_task(
+            with self._live_display(live_type="progress") as self.progress:
+                task = self.progress.add_task(
                     "[cyan]Processing Species...", total=len(species_list))
 
                 for count, species in enumerate(species_list, start=1):
@@ -70,17 +70,17 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
 
                             if not matched_rows.empty:
                                 if not any("[WORKFLOW] Failed" in str(row.values) for _, row in matched_rows.iterrows()):
-                                    progress.update(task, advance=1)
-                                    progress.log(
+                                    self.progress.update(task, advance=1)
+                                    self.progress.console.print(
                                         f"[WORKFLOW][SKIP({count}/{len(species_list)})] {species_name}({latin_name}) already processed.")
                                     continue
 
                                 existing_df = existing_df[~((existing_df[self.latin_name_key] == latin_name) &
                                                             (existing_df.apply(lambda row: "[WORKFLOW] Failed" in str(row.values), axis=1)))]
-                                progress.log(
+                                self.progress.console.print(
                                     f"[WORKFLOW] Removed failed records for {species_name}({latin_name}).")
 
-                        progress.update(
+                        self.progress.update(
                             task, description=f"[cyan]Processing {species_name}({latin_name})...")
                         species_info = self.agent.query_species_info(
                             species_name, latin_name)
@@ -99,7 +99,7 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
 
                         self.agent.chat_engine.clear_context()
                     except Exception as e:
-                        progress.log(
+                        self.progress.console.print(
                             f"[WORKFLOW] Failed: {e} for {species_name}({latin_name})")
                         error_result = {
                             col: "[WORKFLOW] Failed" for col in self.result_columns}
@@ -109,4 +109,4 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
                             [existing_df, error_df], ignore_index=True)
                         self._save_excel(save_path, existing_df)
 
-                    progress.update(task, advance=1)
+                    self.progress.update(task, advance=1)

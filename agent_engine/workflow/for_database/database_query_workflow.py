@@ -23,6 +23,7 @@ class DatabaseQueryWorkflow(BaseWorkflow):
                 model_name=self.cfg.workflow.agent.members[0].model_name,
                 db_config=self.cfg.database,
                 system_prompt=self.cfg.workflow.agent.members[0].system_prompt,
+                language=self.cfg.workflow.agent.language,
                 tmp_dir=self.cfg.workflow.agent.members[0].tmp_dir,
                 max_new_tokens=self.cfg.workflow.agent.members[0].max_new_tokens,
                 vllm_cfg=self.cfg.workflow.agent.vllm
@@ -30,6 +31,7 @@ class DatabaseQueryWorkflow(BaseWorkflow):
             self.agent_class[1](
                 model_name=self.cfg.workflow.agent.members[1].model_name,
                 system_prompt=self.cfg.workflow.agent.members[1].system_prompt,
+                language=self.cfg.workflow.agent.language,
                 tmp_dir=self.cfg.workflow.agent.members[1].tmp_dir,
                 max_new_tokens=self.cfg.workflow.agent.members[1].max_new_tokens,
                 vllm_cfg=self.cfg.workflow.agent.vllm
@@ -44,20 +46,20 @@ class DatabaseQueryWorkflow(BaseWorkflow):
 
     def _verbose_output(self, save_path: str):
         df = pd.read_excel(save_path)
-        print("-" * 50)
-        print("[VERBOSE OUTPUT]\n")
+        self.progress.console.print("-" * 50)
+        self.progress.console.print("[green][VERBOSE OUTPUT]\n")
         for _, row in df.iterrows():
-            print(f"[Natural query]\n\n{row['query']}\n")
-            print(f"[SQL]\n\n{row['sql']}\n")
-            print(f"[Result]\n\n{row['analysis']}\n")
-            print("-" * 50)
+            self.progress.console.print(f"[green][Natural query]\n\n{row['query']}\n")
+            self.progress.console.print(f"[green][SQL]\n\n{row['sql']}\n")
+            self.progress.console.print(f"[green][Result]\n\n{row['analysis']}\n")
+            self.progress.console.print("-" * 50)
 
     def _execute(self):
-        with self._live_display(live_type="progress") as progress:
-            task = progress.add_task("[cyan]Processing query...", total=len(self.queries))
+        with self._live_display(live_type="progress") as self.progress:
+            task = self.progress.add_task("[cyan]Processing query...", total=len(self.queries))
 
             for query in self.queries:
-                progress.update(task, description=f"[cyan]Processing query: {query}")
+                self.progress.update(task, description=f"[cyan]Processing query: {query}")
 
                 db_result = self.agent[0].natural_query(query)
                 self.results.append({
@@ -82,9 +84,9 @@ class DatabaseQueryWorkflow(BaseWorkflow):
                     self.agent[0].chat_engine.clear_context()
                 self.agent[1].chat_engine.clear_context()
                 self._save_results(self.results)
-                progress.console.print(f"[green][WORKFLOW] Result updated: {self.cfg.workflow.save_path}")
+                self.progress.console.print(f"[green][WORKFLOW] Result updated: {self.cfg.workflow.save_path} for query: {query}")
 
-                progress.advance(task)
+                self.progress.advance(task)
 
     def _post_execute(self):
         if self.cfg.workflow.verbose:
