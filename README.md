@@ -3,9 +3,10 @@
 ╭──────  AGENT ENGINE  ──────╮╮
 │  ░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒   ││  Help you creating things better ~
 ╰────────────────────────────╯╯
-------
-A powerful and flexible framework designed to build, manage, and deploy intelligent agents for various applications.
 ```
+<p align="center">
+A powerful and flexible framework designed to build, manage, and deploy intelligent agents for various applications.
+</p>
 <p align="center">
   <a href="#features">Features</a> •
   <a href="#installation">Installation</a> •
