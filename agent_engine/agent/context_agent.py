@@ -4,8 +4,6 @@ import requests
 import base64
 from typing import Optional
 from PIL import Image
-from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
-from qwen_vl_utils import process_vision_info
 from agent_engine.agent import BaseChatEngine
 
 

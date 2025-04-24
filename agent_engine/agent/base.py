@@ -6,7 +6,6 @@ from transformers import AutoModelForCausalLM, AutoProcessor
 from dataclasses import dataclass
 import os
 from rich.console import Console
-from rich import print
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # Initialize rich console
