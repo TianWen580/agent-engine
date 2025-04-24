@@ -1,0 +1,12 @@
+workflow:
+  agent:
+    vllm:
+      enable: false
+      tensor_parallel_size: 1
+      max_model_len: 10000
+      gpu_memory_utilization: 0.7
+    language: english
+    system_prompt: You are a helpful assistant.
+    tmp_dir: asset/tmp
+    context: 4096
+    max_new_tokens: 4096

@@ -8,6 +8,7 @@ class BaikeSpeciesNameTranslateAgent:
             self,
             model_name: str,
             system_prompt: str = "",
+            language: str = "english",
             storage_dir: str = "storage",
             storage_update_interval: int = 30,
             secure_sleep_time: int = 2,
@@ -20,6 +21,7 @@ class BaikeSpeciesNameTranslateAgent:
         self.chat_engine = ContextualChatEngine(
             model_name=model_name,
             system_prompt=system_prompt,
+            language=language,
             tmp_dir=tmp_dir,
             max_new_tokens=max_new_tokens,
             vllm_cfg=vllm_cfg
@@ -53,27 +55,27 @@ class BaikeSpeciesNameTranslateAgent:
         source_name = coco_category.get("name", "")
 
         if mode == "en2la":
-            name_info = f"英文名：{source_name}"
-            target_lang = "拉丁学名"
+            name_info = f"English name: {source_name}"
+            target_lang = "Latin scientific name"
         elif mode == "la2en":
-            name_info = f"拉丁学名：{source_name}"
-            target_lang = "英文名"
+            name_info = f"Latin scientific name: {source_name}"
+            target_lang = "English name"
             
         formatted_coco_category = json.dumps(coco_category, ensure_ascii=False, indent=4)
         
         return f"""
-原始的 coco 格式的 category 成员是：
+The original COCO-formatted category member is:
 {formatted_coco_category}    
 
-需要翻译的名字是：{name_info}
+The name to be translated is: {name_info}
 
-维基百科核心文本内容（清仔细检查是否有翻译成{target_lang}的线索）：
+Wikipedia core text content (please carefully check for clues to translate into {target_lang}):
 {wiki_content[:self.context]}...
 
-只需要替换掉原始的 coco 格式的 category 的 name 属性，不要加```json```之类的格式，比如：
+Only replace the `name` attribute in the original COCO-formatted category. Do not add formatting like ```json```. For example:
 {{
     "id": xx,
-    "name": "新的名字",
-    "supercategory": "新的超类别"
+    "name": "new_name",
+    "supercategory": "new_supercategory"
 }}
 """.strip()

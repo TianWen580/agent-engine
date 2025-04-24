@@ -14,6 +14,7 @@ class SmartVisualizeAgent:
         self,
         model_name: str,
         system_prompt: str = "",
+        language: str = "english",
         tmp_dir: str = "asset/tmp",
         max_new_tokens: int = 1024,
         vllm_cfg: Optional[dict] = None
@@ -21,6 +22,7 @@ class SmartVisualizeAgent:
         self.chat_engine = ContextualChatEngine(
             model_name=model_name,
             system_prompt=system_prompt,
+            language=language,
             tmp_dir=tmp_dir,
             max_new_tokens=max_new_tokens,
             vllm_cfg=vllm_cfg
@@ -135,7 +137,7 @@ class SmartVisualizeAgent:
                 chart.render(file_path)
                 file_paths.append(file_path)
             except Exception as e:
-                print(f"[ERROR] 图表生成失败: {str(e)}")
+                self.chat_engine.console.print(f"[ERROR] 图表生成失败: {str(e)}")
 
         return file_paths
 
@@ -238,7 +240,7 @@ class SmartVisualizeAgent:
 
         except Exception as e:
             error_msg = f"渲染失败: {str(e)}\n配置内容: {json.dumps(config, indent=2)}"
-            print(f"[ERROR] {error_msg}")
+            self.chat_engine.console.print(f"[ERROR] {error_msg}")
             raise RuntimeError(error_msg)
 
     def _validate_config(self, config):

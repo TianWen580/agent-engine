@@ -1,4 +1,5 @@
 import yaml
+from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 from rich.console import Console
@@ -13,15 +14,40 @@ from agent_engine.utils import import_class
 from agent_engine import __version__
 
 class BaseWorkflow(ABC):
+    """_summary_
+
+    Args:
+        config (str): Path to the workflow configuration file.
+        
+    Raises:
+        FileNotFoundError: If the default configuration file is not found.
+        ValueError: If the provided configuration file is invalid.
+        
+    This class serves as a base for creating different workflows in the agent engine.
+    It handles loading the configuration, initializing agents, and executing the workflow.
+    The workflow execution process includes pre-execution initialization, main execution,
+    and post-execution cleanup. It also provides a live display for monitoring the workflow status.
+    """
     def __init__(self, config: str):
         self.console = Console()
         self.agent = None
+        self.default_config_path = str(Path(__file__).parent.parent.parent / "configs" / "base.yaml")
         self._live_context = None
         self._load_config(config)
         self._init_agent_class()
         self._init_agents()
 
     def execute(self, *args, **kwargs) -> Any:
+        """_summary_
+
+        Args:
+            *args: Positional arguments for the workflow execution.
+            **kwargs: Keyword arguments for the workflow execution.
+            
+        This method is responsible for executing the workflow. It handles pre-execution
+        and post-execution tasks, as well as error handling. It also provides a live display
+        for monitoring the workflow status.
+        """
         workflow_type = self.cfg.raw.get("workflow", {}).get("type", "Unknown Workflow")
         self.console.print(Panel(f"[bold blue][WORKFLOW] Starting: {workflow_type}[/bold blue]", expand=False))
         
@@ -48,18 +74,28 @@ class BaseWorkflow(ABC):
         pass
     
     def _load_config(self, config: str):
-        """Load the configuration file."""
         self.cfg = load_config(config)
-        
+
+        try:
+            default_cfg = load_config(self.default_config_path)
+        except FileNotFoundError:
+            default_cfg = None
+            self.console.print(f"[bold yellow][WORKFLOW] Default config not found at {self.default_config_path}, skipping...[/bold yellow]")
+
+        if default_cfg:
+            for key, value in default_cfg.raw.items():
+                if key not in self.cfg.raw:
+                    self.cfg.raw[key] = value
+
         config_table = Table(title="Configuration Details")
         config_table.add_column("Key", style="white", no_wrap=True)
         config_table.add_column("Value", style="grey50")
-        
+
         for key, value in self.cfg.raw.items():
             if isinstance(value, dict):
                 value = yaml.dump(value, allow_unicode=True, sort_keys=False, default_flow_style=False).strip()
             config_table.add_row(key, str(value))
-        
+
         self.console.print(config_table)
         self.console.print(Panel("[bold green][WORKFLOW] Configuration Loaded[/bold green]", expand=False))
         text = f"""
@@ -68,6 +104,7 @@ class BaseWorkflow(ABC):
 ╰────────── {__version__} ──────────╯╯
 """
         self.console.print(text)
+
             
     def _init_agent_class(self):
         if self.cfg.workflow.agent.type == "multi_agents":

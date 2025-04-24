@@ -29,6 +29,7 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
         self.agent = self.agent_class(
             model_name=self.cfg.workflow.agent.model_name,
             system_prompt=self.cfg.workflow.agent.system_prompt,
+            language=self.cfg.workflow.agent.language,
             tmp_dir=self.cfg.workflow.agent.tmp_dir,
             max_new_tokens=self.cfg.workflow.agent.max_new_tokens,
             vllm_cfg=self.cfg.workflow.agent.vllm,
@@ -40,15 +41,15 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
             os.makedirs(os.path.dirname(save_path))
         with open(save_path, 'w') as f:
             json.dump(coco_data, f, ensure_ascii=False, indent=4)
-        print(f"[WORKFLOW] Corrected annotations saved to {save_path}")
+        self.progress.console.print(f"[WORKFLOW] Corrected annotations saved to {save_path}")
     
     def _execute(self):
-        with self._live_display(live_type="progress") as progress:
-            outer_task = progress.add_task(
+        with self._live_display(live_type="progress") as self.progress:
+            outer_task = self.progress.add_task(
                 "[bold green]Processing COCO files...", total=len(self.coco_paths))
 
             for coco_path, save_path in zip(self.coco_paths, self.save_paths):
-                progress.console.print(
+                self.progress.console.print(
                     f"[WORKFLOW] Processing COCO file: {coco_path}")
                 coco_data = None
                 corrected_annotations = []
@@ -62,7 +63,7 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
                     if category['name'] in self.cfg.workflow.allowed_classes
                 ]
 
-                inner_task = progress.add_task(
+                inner_task = self.progress.add_task(
                     "[cyan]Processing images...", total=len(coco_data['images']))
 
                 for image_info in coco_data['images']:
@@ -80,8 +81,8 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
                     corrected_annotations.extend(corrected_annotation_list)
                     self.agent.chat_engine.clear_context()
 
-                    progress.update(inner_task, advance=1)
+                    self.progress.update(inner_task, advance=1)
 
                 self._save_results(save_path, corrected_annotations, coco_data)
 
-                progress.update(outer_task, advance=1)
+                self.progress.update(outer_task, advance=1)

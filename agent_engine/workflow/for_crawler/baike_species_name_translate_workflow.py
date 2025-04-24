@@ -16,6 +16,7 @@ class BaikeSpeciesNameTranslateWorkflow(BaseWorkflow):
         self.agent = self.agent_class(
             model_name=self.cfg.workflow.agent.model_name,
             system_prompt=self.cfg.workflow.agent.system_prompt,
+            language=self.cfg.workflow.agent.language,
             storage_dir=self.cfg.workflow.storage.path,
             storage_update_interval=self.cfg.workflow.storage.update_interval,
             secure_sleep_time=self.cfg.workflow.secure_sleep.time,
