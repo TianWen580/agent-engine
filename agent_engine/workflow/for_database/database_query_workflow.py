@@ -47,19 +47,18 @@ class DatabaseQueryWorkflow(BaseWorkflow):
         print("-" * 50)
         print("[VERBOSE OUTPUT]\n")
         for _, row in df.iterrows():
-            print(f"[查询语句]\n\n{row['query']}\n")
-            print(f"[生成SQL]\n\n{row['sql']}\n")
-            print(f"[分析结果]\n\n{row['analysis']}\n")
+            print(f"[Natural query]\n\n{row['query']}\n")
+            print(f"[SQL]\n\n{row['sql']}\n")
+            print(f"[Result]\n\n{row['analysis']}\n")
             print("-" * 50)
 
     def _execute(self):
         with self._live_display(live_type="progress") as progress:
-            task = progress.add_task("[cyan]处理查询...", total=len(self.queries))
+            task = progress.add_task("[cyan]Processing query...", total=len(self.queries))
 
             for query in self.queries:
-                progress.update(task, description=f"[cyan]处理查询: {query}")
+                progress.update(task, description=f"[cyan]Processing query: {query}")
 
-                # 数据库查询阶段
                 db_result = self.agent[0].natural_query(query)
                 self.results.append({
                     "query": query,
@@ -70,7 +69,6 @@ class DatabaseQueryWorkflow(BaseWorkflow):
                     "visualizations": "[]"
                 })
 
-                # 可视化生成阶段（注释部分）
                 # if db_result['status'] == 'success' and db_result['result']:
                 #     data_structure = {k: type(v).__name__ for k, v in db_result['result'][0].items()}
                 #     visual_paths = self.agent[1].generate_visuals(
@@ -84,7 +82,7 @@ class DatabaseQueryWorkflow(BaseWorkflow):
                     self.agent[0].chat_engine.clear_context()
                 self.agent[1].chat_engine.clear_context()
                 self._save_results(self.results)
-                progress.console.print(f"[green][WORKFLOW] 结果已更新至 {self.cfg.workflow.save_path}")
+                progress.console.print(f"[green][WORKFLOW] Result updated: {self.cfg.workflow.save_path}")
 
                 progress.advance(task)
 

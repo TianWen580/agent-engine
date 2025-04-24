@@ -26,6 +26,11 @@ workflow:
 
 database:
   host: 127.0.0.1
+  port: 3306
   user: root
-  password: 1-Password
+  password: password
   database: test
+  meta:
+    tables:
+      - table1: table describtion here...
+    column_comment_key: COLUMN_COMMENT

@@ -30,7 +30,7 @@ class ContextualChatEngine(BaseChatEngine):
         if self.is_online:
             content = []
 
-            if img_path:
+            if self.model_config.supports_images and img_path:
                 if not os.path.exists(img_path):
                     return {
                         'status': 'error',
@@ -112,7 +112,7 @@ class ContextualChatEngine(BaseChatEngine):
                     'image_path': img_path
                 }
         else:
-            if img_path:
+            if self.model_config.supports_images and img_path:
                 img = Image.open(img_path).convert("RGB")
                 img_path = os.path.join(self.tmp_dir, f"{job_id}.jpg")
                 img.save(img_path)
@@ -163,7 +163,7 @@ class ContextualChatEngine(BaseChatEngine):
                     text = self.processor.apply_chat_template(
                         messages, tokenize=False, add_generation_prompt=True
                     )
-                    if self.model_config.supports_images:
+                    if self.model_config.supports_images and img_path:
                         inputs = self.processor(
                             text=[text],
                             images=[item["image"] for item in user_content if item["type"] == "image"],

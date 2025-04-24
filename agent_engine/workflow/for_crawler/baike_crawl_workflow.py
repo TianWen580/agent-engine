@@ -11,23 +11,22 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
     ):
         super().__init__(config)
         
-        self.result_columns = [
-            "中文名", "拉丁名",
-            "中国保护等级", "国际濒危等级",
-            "形态特征(详细)", "形态特征(简化)",
-            "生活习性(详细)", "生活习性(简化)",
-            "栖息环境(详细)", "栖息环境(简化)"
-        ]
-        
         self.catalogue_paths = self.cfg.workflow.catalogue_paths
         self.catalogue_columns = self.cfg.workflow.catalogue_columns
-        self.save_catalogue_columns = self.cfg.workflow.save.save_catalogue_columns
+        self.save_catalogue_columns = list(self.cfg.workflow.save.save_catalogue.raw.values())
         self.save_paths = self.cfg.workflow.save.save_paths
+        self.save_columns = list(self.cfg.workflow.save.save_columns.raw.keys())
+        self.result_columns = self.save_catalogue_columns.copy()
+        self.result_columns.extend(self.save_columns)
+        self.species_name_key = self.cfg.workflow.save.save_catalogue.name
+        self.latin_name_key = self.cfg.workflow.save.save_catalogue.latin_name
 
     def _init_agents(self):
         self.agent = self.agent_class(
             model_name=self.cfg.workflow.agent.model_name,
             system_prompt=self.cfg.workflow.agent.system_prompt,
+            language=self.cfg.workflow.save.language,
+            research_columns=self.cfg.workflow.save.save_columns.raw,
             storage_dir=self.cfg.workflow.storage.path,
             storage_update_interval=self.cfg.workflow.storage.update_interval,
             secure_sleep_time=self.cfg.workflow.secure_sleep.time,
@@ -61,42 +60,35 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
                     "[cyan]Processing Species...", total=len(species_list))
 
                 for count, species in enumerate(species_list, start=1):
-                    chinese_name = species.get("中文名", "")
-                    latin_name = species.get("拉丁名", "")
+                    species_name = species.get(self.species_name_key, "")
+                    latin_name = species.get(self.latin_name_key, "")
 
                     try:
                         if not existing_df.empty:
-                            matched_rows = existing_df[existing_df["拉丁名"]
+                            matched_rows = existing_df[existing_df[self.latin_name_key]
                                                        == latin_name]
 
                             if not matched_rows.empty:
                                 if not any("[WORKFLOW] Failed" in str(row.values) for _, row in matched_rows.iterrows()):
                                     progress.update(task, advance=1)
-                                    print(
-                                        f"[WORKFLOW][SKIP({count}/{len(species_list)})] {chinese_name}({latin_name}) already processed.")
+                                    progress.log(
+                                        f"[WORKFLOW][SKIP({count}/{len(species_list)})] {species_name}({latin_name}) already processed.")
                                     continue
 
-                                existing_df = existing_df[~((existing_df["拉丁名"] == latin_name) &
+                                existing_df = existing_df[~((existing_df[self.latin_name_key] == latin_name) &
                                                             (existing_df.apply(lambda row: "[WORKFLOW] Failed" in str(row.values), axis=1)))]
-                                print(
-                                    f"[WORKFLOW] Removed failed records for {chinese_name}({latin_name}).")
+                                progress.log(
+                                    f"[WORKFLOW] Removed failed records for {species_name}({latin_name}).")
 
                         progress.update(
-                            task, description=f"[cyan]Processing {chinese_name}({latin_name})...")
+                            task, description=f"[cyan]Processing {species_name}({latin_name})...")
                         species_info = self.agent.query_species_info(
-                            chinese_name, latin_name)
+                            species_name, latin_name)
 
                         formatted = {
-                            "中文名": chinese_name,
-                            "拉丁名": latin_name,
-                            "中国保护等级": species_info.get("中国保护等级", "未找到"),
-                            "国际濒危等级": species_info.get("国际濒危等级", "未找到"),
-                            "形态特征(详细)": species_info["形态特征"]["详细"],
-                            "形态特征(简化)": species_info["形态特征"]["简要"],
-                            "生活习性(详细)": species_info["生活习性"]["详细"],
-                            "生活习性(简化)": species_info["生活习性"]["简要"],
-                            "栖息环境(详细)": species_info["栖息环境"]["详细"],
-                            "栖息环境(简化)": species_info["栖息环境"]["简要"]
+                            self.species_name_key: species_name,
+                            self.latin_name_key: latin_name,
+                            **{key: species_info.get(key, "未找到") for key in self.result_columns if key not in [self.species_name_key, self.latin_name_key]}
                         }
 
                         current_result = pd.DataFrame([formatted])
@@ -107,8 +99,8 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
 
                         self.agent.chat_engine.clear_context()
                     except Exception as e:
-                        print(
-                            f"[WORKFLOW] Failed: {e} for {chinese_name}({latin_name})")
+                        progress.log(
+                            f"[WORKFLOW] Failed: {e} for {species_name}({latin_name})")
                         error_result = {
                             col: "[WORKFLOW] Failed" for col in self.result_columns}
                         error_df = pd.DataFrame([error_result])
