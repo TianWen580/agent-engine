@@ -87,7 +87,7 @@ Please return the result in the following JSON format:
             json_content = response_text[start:end]
             return json.loads(json_content)
         except Exception as e:
-            self.chat_engine.console.print(f"[ERROR] Json not formated well: {e} for {name}")
+            self.chat_engine.console.print(f"[bold red]Json not formated well: [bold cyan]{e}[/bold cyan] for [bold cyan]{name}[/bold cyan]")
             return {
-                **{key: f"[ERROR] Failed" for key in self.research_columns.keys()},
+                **{key: f"[bold red]Failed[/bold red][bold cyan]" for key in self.research_columns.keys()},
             }

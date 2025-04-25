@@ -55,7 +55,7 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
             else:
                 existing_df = pd.DataFrame(columns=self.result_columns)
 
-            with self._live_display(live_type="progress") as self.progress:
+            with self.bar(live_type="progress") as self.progress:
                 task = self.progress.add_task(
                     "[cyan]Processing Species...", total=len(species_list))
 
@@ -71,13 +71,13 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
                             if not matched_rows.empty:
                                 if not any("[WORKFLOW] Failed" in str(row.values) for _, row in matched_rows.iterrows()):
                                     self.progress.update(task, advance=1)
-                                    self.progress.console.print(
+                                    self.console.print(
                                         f"[WORKFLOW][SKIP({count}/{len(species_list)})] {species_name}({latin_name}) already processed.")
                                     continue
 
                                 existing_df = existing_df[~((existing_df[self.latin_name_key] == latin_name) &
                                                             (existing_df.apply(lambda row: "[WORKFLOW] Failed" in str(row.values), axis=1)))]
-                                self.progress.console.print(
+                                self.console.print(
                                     f"[WORKFLOW] Removed failed records for {species_name}({latin_name}).")
 
                         self.progress.update(
@@ -99,10 +99,10 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
 
                         self.agent.chat_engine.clear_context()
                     except Exception as e:
-                        self.progress.console.print(
-                            f"[WORKFLOW] Failed: {e} for {species_name}({latin_name})")
+                        self.console.print(
+                            f"[bold red]Failed: [bold cyan]{e} for {species_name}({latin_name})[/bold cyan]")
                         error_result = {
-                            col: "[WORKFLOW] Failed" for col in self.result_columns}
+                            col: "[bold red]Failed[/bold red][bold cyan]" for col in self.result_columns}
                         error_df = pd.DataFrame([error_result])
 
                         existing_df = pd.concat(

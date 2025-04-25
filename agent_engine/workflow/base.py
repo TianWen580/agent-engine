@@ -12,6 +12,7 @@ from contextlib import contextmanager
 from agent_engine.utils import load_config
 from agent_engine.utils import import_class
 from agent_engine import __version__
+from agent_engine.utils.warpper import VerboseConsoleWrapper
 
 class BaseWorkflow(ABC):
     """_summary_
@@ -29,7 +30,7 @@ class BaseWorkflow(ABC):
     and post-execution cleanup. It also provides a live display for monitoring the workflow status.
     """
     def __init__(self, config: str):
-        self.console = Console()
+        self.console = VerboseConsoleWrapper(Console(), role="WORKFLOW")
         self.agent = None
         self.default_config_path = str(Path(__file__).parent.parent.parent / "configs" / "base.yaml")
         self._live_context = None
@@ -49,22 +50,27 @@ class BaseWorkflow(ABC):
         for monitoring the workflow status.
         """
         workflow_type = self.cfg.raw.get("workflow", {}).get("type", "Unknown Workflow")
-        self.console.print(Panel(f"[bold blue][WORKFLOW] Starting: {workflow_type}[/bold blue]", expand=False))
+        self.console.print(Panel(f"Starting: [bold cyan]{workflow_type}[/bold cyan]", expand=False))
         
         try:
-            self.console.print("[bold yellow][WORKFLOW] Pre-execution initialization...[/bold yellow]")
+            self.console.print("[bold cyan]Pre-execution...", end="")
             self._pre_execute()
+            self.console.print("[bold green] ✔", verbose=False)
+            self.console.print("[bold cyan]Processing...", end="")
             result = self._execute(*args, **kwargs)
+            self.console.print("[bold green] ✔", verbose=False)
             return result
         except Exception as e:
             self.handle_error(e)
             raise
         finally:
-            self.console.print("[bold yellow][WORKFLOW] Post-execution...[/bold yellow]")
+            self.console.print("[bold cyan]Post-execution...", end="")
             self._post_execute()
-            self.console.print("[bold yellow][WORKFLOW] Cleaning up resources...[/bold yellow]")
+            self.console.print("[bold green] ✔", verbose=False)
+            self.console.print("[bold cyan]Cleaning up resources...", end="")
             self.cleanup()
-            self.console.print(Panel("[bold green][WORKFLOW] Completed[/bold green]", expand=False))
+            self.console.print("[bold green] ✔", verbose=False)
+            self.console.print(Panel("[bold green]Completed", expand=False))
 
     @abstractmethod
     def _execute(self, *args, **kwargs) -> Any:
@@ -80,14 +86,14 @@ class BaseWorkflow(ABC):
             default_cfg = load_config(self.default_config_path)
         except FileNotFoundError:
             default_cfg = None
-            self.console.print(f"[bold yellow][WORKFLOW] Default config not found at {self.default_config_path}, skipping...[/bold yellow]")
+            self.console.print(f"[bold yellow]Default config not found at [bold cyan]{self.default_config_path}[/bold cyan], skipping...")
 
         if default_cfg:
             for key, value in default_cfg.raw.items():
                 if key not in self.cfg.raw:
                     self.cfg.raw[key] = value
 
-        config_table = Table(title="Configuration Details")
+        config_table = Table(title="\nConfiguration Details")
         config_table.add_column("Key", style="white", no_wrap=True)
         config_table.add_column("Value", style="grey50")
 
@@ -96,14 +102,14 @@ class BaseWorkflow(ABC):
                 value = yaml.dump(value, allow_unicode=True, sort_keys=False, default_flow_style=False).strip()
             config_table.add_row(key, str(value))
 
-        self.console.print(config_table)
-        self.console.print(Panel("[bold green][WORKFLOW] Configuration Loaded[/bold green]", expand=False))
+        self.console.print(config_table, verbose=False)
+        self.console.print(Panel("[bold green]Configuration Loaded", expand=False))
 
         self.console.print(f"""
 ╭──────  AGENT ENGINE  ─────╮╮
 │  ░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒  ││  Help you creating things better ~
 ╰────────── [bold green]{__version__}[/bold green] ──────────╯╯
-""")
+""", verbose=False)
 
             
     def _init_agent_class(self):
@@ -115,7 +121,7 @@ class BaseWorkflow(ABC):
             self.agent_class = import_class(self.cfg.workflow.agent.type)
 
     @contextmanager
-    def _live_display(self, live_type="status", message=None):
+    def bar(self, live_type="status", message=None):
         if self._live_context is not None:
             raise RuntimeError("A live display is already active. Nested live displays are not allowed.")
         
@@ -146,7 +152,7 @@ class BaseWorkflow(ABC):
 
     def handle_error(self, error: Exception) -> None:
         error_message = Syntax(str(error), "python", theme="monokai", line_numbers=False)
-        self.console.print(Panel(error_message, title="[bold red][WORKFLOW] Error Occurred[/bold red]", expand=False))
+        self.console.print(Panel(error_message, title="[bold red]Error Occurred", expand=False))
 
     def cleanup(self) -> None:
         if hasattr(self, "_live_context") and self._live_context is not None:

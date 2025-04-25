@@ -41,16 +41,16 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
             os.makedirs(os.path.dirname(save_path))
         with open(save_path, 'w') as f:
             json.dump(coco_data, f, ensure_ascii=False, indent=4)
-        self.progress.console.print(f"[WORKFLOW] Corrected annotations saved to {save_path}")
+        self.console.print(f"[bold green]Corrected annotations saved to [bold cyan]{save_path}[/bold cyan]")
     
     def _execute(self):
-        with self._live_display(live_type="progress") as self.progress:
+        with self.bar(live_type="progress") as self.progress:
             outer_task = self.progress.add_task(
                 "[bold green]Processing COCO files...", total=len(self.coco_paths))
 
             for coco_path, save_path in zip(self.coco_paths, self.save_paths):
-                self.progress.console.print(
-                    f"[WORKFLOW] Processing COCO file: {coco_path}")
+                self.console.print(
+                    f"Processing COCO file: [bold cyan]{coco_path}[/bold cyan]")
                 coco_data = None
                 corrected_annotations = []
 

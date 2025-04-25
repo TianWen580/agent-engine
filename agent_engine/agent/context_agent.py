@@ -249,7 +249,7 @@ class ContextualChatEngine(BaseChatEngine):
         except Exception as e:
             self.tasks[job_id]['status'] = 'error'
             self.tasks[job_id]['result'] = str(e)
-            self.console.print(f"[AGENT] Error processing task {job_id}: {e}")
+            self.console.print(f"[bold red]Error processing task [bold cyan]{job_id}: {e}[/bold cyan]")
             if img_path and os.path.exists(img_path):
                 os.remove(img_path)
             return self.tasks[job_id]

@@ -33,7 +33,7 @@ class COCOClassCheckerAgent:
         allowed_classes = coco_info.get("allowed_classes", [])
 
         if not image_path or not os.path.exists(image_path):
-            raise ValueError(f"[AGENT] Image file not found: {image_path}")
+            raise ValueError(f"[bold red]Image file not found: [bold cyan]{image_path}[/bold cyan]")
 
         prompt = f"""
 Original input:
@@ -101,7 +101,7 @@ Abstract example:
                 corrected_annotations = json.dumps(corrected_annotations)
                 corrected_annotations = json.loads(corrected_annotations)
             except (ValueError, SyntaxError) as e:
-                self.chat_engine.console.print(f"[AGENT] Invalid format: {corrected_annotations}. Error: {e}")
+                self.chat_engine.console.print(f"[bold red]Invalid format: {corrected_annotations}. Error: [bold cyan]{e}[/bold cyan]")
                 corrected_annotations = annotations
 
         id_list = [
@@ -114,7 +114,7 @@ Abstract example:
             if any(
                 cls not in id_list for cls in anno_id_list
             ):
-                self.chat_engine.console.print(f"[AGENT] Invalid category id generated: {annotation['category_id']}")
+                self.chat_engine.console.print(f"[bold red]Invalid category id generated: [bold cyan]{annotation['category_id']}[/bold cyan]")
                 corrected_annotations = annotations
                 break
 
