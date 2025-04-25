@@ -41,16 +41,15 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
             os.makedirs(os.path.dirname(save_path))
         with open(save_path, 'w') as f:
             json.dump(coco_data, f, ensure_ascii=False, indent=4)
-        self.progress.console.print(f"[WORKFLOW] Corrected annotations saved to {save_path}")
+        print(f"Corrected annotations saved to {save_path}")
     
     def _execute(self):
-        with self._live_display(live_type="progress") as self.progress:
+        with self.bar(live_type="progress") as self.progress:
             outer_task = self.progress.add_task(
-                "[bold green]Processing COCO files...", total=len(self.coco_paths))
+                "Processing COCO files...", total=len(self.coco_paths))
 
             for coco_path, save_path in zip(self.coco_paths, self.save_paths):
-                self.progress.console.print(
-                    f"[WORKFLOW] Processing COCO file: {coco_path}")
+                self.progress.update(outer_task, description=f"[bold cyan]Processing COCO file: {coco_path}")
                 coco_data = None
                 corrected_annotations = []
 
@@ -67,6 +66,7 @@ class COCOClassCheckerWorkflow(BaseWorkflow):
                     "[cyan]Processing images...", total=len(coco_data['images']))
 
                 for image_info in coco_data['images']:
+                    self.progress.update(inner_task, description=f"[cyan]Processing image: {image_info['file_name']}")
                     image_file_name = os.path.basename(image_info['file_name'])
                     annotations = [
                         ann for ann in coco_data['annotations'] if ann['image_id'] == image_info['id']]

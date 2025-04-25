@@ -137,7 +137,7 @@ class SmartVisualizeAgent:
                 chart.render(file_path)
                 file_paths.append(file_path)
             except Exception as e:
-                self.chat_engine.console.print(f"[ERROR] 图表生成失败: {str(e)}")
+                self.chat_engine.console.print(f"[bold red]图表生成失败: [bold cyan]{str(e)}[/bold cyan]")
 
         return file_paths
 
@@ -240,7 +240,7 @@ class SmartVisualizeAgent:
 
         except Exception as e:
             error_msg = f"渲染失败: {str(e)}\n配置内容: {json.dumps(config, indent=2)}"
-            self.chat_engine.console.print(f"[ERROR] {error_msg}")
+            self.chat_engine.console.print(f"[bold red]{error_msg}")
             raise RuntimeError(error_msg)
 
     def _validate_config(self, config):

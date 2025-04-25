@@ -2,10 +2,11 @@ from abc import ABC, abstractmethod
 import os
 import torch
 from typing import Dict, Optional, Union, Type
+from rich.console import Console
 from transformers import AutoModelForCausalLM, AutoProcessor
 from dataclasses import dataclass
-import os
-from rich.console import Console
+from agent_engine.utils.warpper import VerboseConsoleWrapper
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 try:
@@ -28,7 +29,7 @@ class ModelConfig:
     processor_class: Type = AutoProcessor
     supports_images: bool = False
     supports_vllm: bool = False
-
+    
 class BaseChatEngine(ABC):
     """_summary_
 
@@ -74,7 +75,7 @@ class BaseChatEngine(ABC):
         max_new_tokens: int = 512,
         vllm_cfg: Optional[dict] = None,
     ):
-        self.console = Console()
+        self.console = VerboseConsoleWrapper(Console(), role="AGENT")
         self.is_online = model_name.startswith('http')
         self.model_config = self._get_model_config(model_name)
         self.tmp_dir = tmp_dir
@@ -90,7 +91,7 @@ class BaseChatEngine(ABC):
 
         if vllm_cfg.enable is None:
             self.use_vllm = False
-            self.console.print("[bold yellow][AGENT] VLLM usage not specified, defaulting to False")
+            self.console.print("[bold yellow]VLLM usage not specified, defaulting to False")
         elif vllm_cfg.enable and not self.is_online:
             try:
                 import vllm
@@ -101,19 +102,19 @@ class BaseChatEngine(ABC):
                            and self.model_config.supports_vllm
                            and self._check_gpu_compatibility())
             if self.use_vllm:
-                self.console.print("[bold green][AGENT] VLLM enabled for acceleration[/bold green]")
+                self.console.print("[bold green]VLLM enabled for acceleration")
             else:
-                self.console.print("[bold yellow][AGENT] VLLM not available or not supported for this model")
+                self.console.print("[bold yellow]VLLM not available or not supported for this model")
         elif not self.is_online:
             self.use_vllm = False
-            self.console.print("[bold yellow][AGENT] VLLM disabled")
+            self.console.print("[bold yellow]VLLM disabled")
             
         if self.is_online:
             parts = model_name.split('@', 2)
             if len(parts) != 3:
-                raise ValueError("[bold red][AGENT][/bold red] Invalid model name for online mode.")
+                raise ValueError("Invalid model name for online mode.")
             self.api_url, self.api_key, self.api_model = parts
-            self.console.print(f"[bold blue][AGENT][/bold blue] Initializing online model with API URL: {self.api_url} for [bold cyan]{self.api_model}[/bold cyan]")
+            self.console.print(f"Initializing online model with API URL: [bold cyan]{self.api_url}[/bold cyan] for [bold cyan]{self.api_model}[/bold cyan]")
             self.model = None
             self.processor = None
         else:
@@ -135,10 +136,10 @@ class BaseChatEngine(ABC):
             
         for pattern, config in self.MODEL_CONFIGS.items():
             if pattern in model_name:
-                self.console.print(f"[bold blue][AGENT][/bold blue] Using model configuration [bold cyan]{pattern}[/bold cyan] for {model_name}")
+                self.console.print(f"Using model configuration [bold cyan]{pattern}[/bold cyan] for [bold cyan]{model_name}[/bold cyan]")
                 return config
                 
-        self.console.print(f"[bold yellow][AGENT] Using default model configuration")
+        self.console.print(f"[bold yellow]Using default model configuration")
         return self.DEFAULT_CONFIG
 
     def _check_gpu_compatibility(self) -> bool:
@@ -148,14 +149,14 @@ class BaseChatEngine(ABC):
             
         major, minor = torch.cuda.get_device_capability()
         if major < 8:
-            self.console.print(f"[bold yellow][AGENT] GPU compute capability {major}.{minor} may have limited VLLM support")
+            self.console.print(f"[bold yellow]GPU compute capability [bold cyan]{major}.{minor}[/bold cyan] may have limited VLLM support")
         return True
 
     def _init_vllm_model(self, model_name: str):
         """Initialize model using VLLM."""
         from vllm import LLM, SamplingParams
         
-        self.console.print("[bold blue][AGENT][/bold blue] Attempting to use VLLM for acceleration")
+        self.console.print("Attempting to use VLLM for acceleration")
         try:
             dtype = 'float16' if torch.cuda.get_device_capability()[0] < 8 else 'auto'
             self.model = LLM(
@@ -173,10 +174,10 @@ class BaseChatEngine(ABC):
                 max_tokens=self.max_new_tokens
             )
             self.processor = None
-            self.console.print("[bold green][AGENT][/bold green] VLLM initialization successful")
+            self.console.print("[bold green]VLLM initialization successful")
         except Exception as e:
-            self.console.print(f"[bold red][AGENT][/bold red] VLLM initialization failed: {str(e)}")
-            self.console.print(f"[bold yellow][AGENT] Rolling back to [bold cyan]transformers[/bold cyan]")
+            self.console.print(f"VLLM initialization failed: [bold red]{str(e)}[/bold red]")
+            self.console.print(f"[bold yellow]Rolling back to [bold cyan]transformers[/bold cyan]")
             self.model = None
             self.processor = None
             self._init_transformers_model(model_name)
@@ -184,20 +185,20 @@ class BaseChatEngine(ABC):
 
     def _init_transformers_model(self, model_name: str):
         """Initialize model using transformers library."""
-        self.console.print(f"[bold blue][AGENT][/bold blue] Implementing transformers model: {model_name}")
+        self.console.print(f"Implementing transformers model: [bold cyan]{model_name}[/bold cyan]")
         try:
             if torch.cuda.is_available():
                 try:
                     from flash_attn import FlashMHA
                     attn_implementation = "flash_attention_2"
-                    self.console.print("[bold green][AGENT][/bold green] Using flash attention for acceleration")
+                    self.console.print("[bold green]Using flash attention for acceleration")
                 except ImportError:
                     attn_implementation = "eager"
-                    self.console.print("[bold yellow][AGENT] Flash attention not available, using [bold cyan]eager[/bold cyan]")
+                    self.console.print("[bold yellow]Flash attention not available, using [bold cyan]eager[/bold cyan]")
             else:
                 attn_implementation = "eager"
         except Exception as e:
-            self.console.print(f"[bold red][AGENT][/bold red] Error checking flash attention: {str(e)}")
+            self.console.print(f"Error checking flash attention: [bold red]{str(e)}[/bold red]")
             attn_implementation = "eager"
 
         self.model = self.model_config.model_class.from_pretrained(
@@ -215,7 +216,7 @@ class BaseChatEngine(ABC):
 
     def _init_system_prompt(self):
         """Initialize the system prompt."""
-        self.console.print(f"[bold blue][AGENT][/bold blue] Responding in [bold cyan]{self.language.upper()}[/bold cyan]")
+        self.console.print(f"[bold green]Agent ready ~ responding in [bold cyan]{self.language.upper()}[/bold cyan]")
         
         if self.model_config.supports_images:
             sys = [{"type": "text", "text": f"(Please response only in language {self.language.upper()})\n\n" + self.system_prompt}]
@@ -237,7 +238,7 @@ class BaseChatEngine(ABC):
                         os.remove(task['image_path'])
                     except (FileNotFoundError, PermissionError, OSError) as e:
                         if hasattr(self, 'console'):
-                            self.console.print(f"[bold yellow][AGENT] Failed to delete temporary file {task['image_path']}: {str(e)}")
+                            self.console.print(f"[bold red]Failed to delete temporary file [bold cyan]{task['image_path']}: {str(e)}[/bold cyan]")
             self.tasks = {}
         
         if hasattr(self, 'tmp_dir') and os.path.exists(self.tmp_dir):
@@ -246,14 +247,14 @@ class BaseChatEngine(ABC):
                     os.remove(os.path.join(self.tmp_dir, file))
                 except (FileNotFoundError, PermissionError, OSError) as e:
                     if hasattr(self, 'console'):
-                        self.console.print(f"[bold yellow][AGENT] Failed to delete temporary file {file}: {str(e)}")
+                        self.console.print(f"[bold red]Failed to delete temporary file [bold cyan]{file}: {str(e)}[/bold cyan]")
 
 
     def __del__(self):
         try:
             self.clear_context()
         except Exception as e:
-            self.console.print(f"[bold yellow][AGENT] Error during cleanup: {str(e)}")
+            self.console.print(f"[bold red]Error during cleanup: [bold cyan]{str(e)}[/bold cyan]")
 
     @abstractmethod
     def generate_response(self, prompt: str, img_path: Optional[str] = None) -> dict:
