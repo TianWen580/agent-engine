@@ -60,6 +60,8 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
                     "[cyan]Processing Species...", total=len(species_list))
 
                 for count, species in enumerate(species_list, start=1):
+                    self.progress.update(task, description=f"[cyan]Processing {species_name}({latin_name})...")
+                    
                     species_name = species.get(self.species_name_key, "")
                     latin_name = species.get(self.latin_name_key, "")
 
@@ -71,17 +73,14 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
                             if not matched_rows.empty:
                                 if not any("[WORKFLOW] Failed" in str(row.values) for _, row in matched_rows.iterrows()):
                                     self.progress.update(task, advance=1)
-                                    self.console.print(
-                                        f"[WORKFLOW][SKIP({count}/{len(species_list)})] {species_name}({latin_name}) already processed.")
+                                    print(f"[SKIP({count}/{len(species_list)})] {species_name}({latin_name}) already processed.")
                                     continue
 
                                 existing_df = existing_df[~((existing_df[self.latin_name_key] == latin_name) &
                                                             (existing_df.apply(lambda row: "[WORKFLOW] Failed" in str(row.values), axis=1)))]
-                                self.console.print(
-                                    f"[WORKFLOW] Removed failed records for {species_name}({latin_name}).")
+                                print(f"Removed failed records for {species_name}({latin_name}).")
 
-                        self.progress.update(
-                            task, description=f"[cyan]Processing {species_name}({latin_name})...")
+
                         species_info = self.agent.query_species_info(
                             species_name, latin_name)
 
@@ -99,10 +98,9 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
 
                         self.agent.chat_engine.clear_context()
                     except Exception as e:
-                        self.console.print(
-                            f"[bold red]Failed: [bold cyan]{e} for {species_name}({latin_name})[/bold cyan]")
+                        print(f"Failed: {e} for {species_name}({latin_name})")
                         error_result = {
-                            col: "[bold red]Failed[/bold red][bold cyan]" for col in self.result_columns}
+                            col: "[WORKFLOW] Failed" for col in self.result_columns}
                         error_df = pd.DataFrame([error_result])
 
                         existing_df = pd.concat(
