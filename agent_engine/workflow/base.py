@@ -98,12 +98,12 @@ class BaseWorkflow(ABC):
 
         self.console.print(config_table)
         self.console.print(Panel("[bold green][WORKFLOW] Configuration Loaded[/bold green]", expand=False))
-        text = f"""
+
+        self.console.print(f"""
 ╭──────  AGENT ENGINE  ─────╮╮
 │  ░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒▓░▒  ││  Help you creating things better ~
-╰────────── {__version__} ──────────╯╯
-"""
-        self.console.print(text)
+╰────────── [bold green]{__version__}[/bold green] ──────────╯╯
+""")
 
             
     def _init_agent_class(self):
