@@ -59,11 +59,11 @@ class BaikeSpeciesWorkflow(BaseWorkflow):
                 task = self.progress.add_task(
                     "[cyan]Processing Species...", total=len(species_list))
 
-                for count, species in enumerate(species_list, start=1):
-                    self.progress.update(task, description=f"[cyan]Processing {species_name}({latin_name})...")
-                    
+                for count, species in enumerate(species_list, start=1):                    
                     species_name = species.get(self.species_name_key, "")
                     latin_name = species.get(self.latin_name_key, "")
+                    
+                    self.progress.update(task, description=f"[cyan]Processing {species_name}({latin_name})...")
 
                     try:
                         if not existing_df.empty:
